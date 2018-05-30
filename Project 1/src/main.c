@@ -127,7 +127,8 @@ int main (void)
 				
 			case(WAITING_S):
 				while(g_waiting_flag == 0)
-					;
+					__NOP;
+				
 				next_state = SAMPLING_S;
 				g_waiting_flag = 0;
 				break;
@@ -155,15 +156,15 @@ int main (void)
 
 void TPM0_IRQHandler()
 {
+	TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
 	if(g_elapsed_ms == g_sample_period)
 	{
 		ADC_Get_Sample();
-		TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
 		g_elapsed_ms = 0;
 		g_values_recorded++;
 		g_waiting_flag = 1;
 	}
 	else
-		g_elapsed_ms++; 
+		g_elapsed_ms++;
 }
 // *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   

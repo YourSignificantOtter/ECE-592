@@ -45240,16 +45240,19 @@ N				break;
 N				
 N			case(WAITING_S):
 N				while(g_waiting_flag == 0)
-N					;
+W "src\main.c" 130 6 expression has no effect
+N					__NOP;
+X					__nop;
+N				
 N				next_state = SAMPLING_S;
 N				g_waiting_flag = 0;
 N				break;
 N				
 N			case(SENDING_DATA_S):
-W "src\main.c" 136 13 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 137 13 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N				sprintf(print_string, "Sending data (%i samples).\n\r", g_num_adc_samples);
 N				Send_String_Poll(print_string);
-W "src\main.c" 138 5 function "Delay" declared implicitly
+W "src\main.c" 139 5 function "Delay" declared implicitly
 N				Delay(1);
 N				next_state = CLI_S;
 N				break;
@@ -45270,16 +45273,16 @@ N}
 N
 Nvoid TPM0_IRQHandler()
 N{
+N	TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
+X	((TPM_Type *)(0x40038000u))->SC |= 0x40u; 
 N	if(g_elapsed_ms == g_sample_period)
 N	{
 N		ADC_Get_Sample();
-N		TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
-X		((TPM_Type *)(0x40038000u))->SC |= 0x40u; 
 N		g_elapsed_ms = 0;
 N		g_values_recorded++;
 N		g_waiting_flag = 1;
 N	}
 N	else
-N		g_elapsed_ms++; 
+N		g_elapsed_ms++;
 N}
 N// *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   

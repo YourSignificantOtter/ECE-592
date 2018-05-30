@@ -19470,8 +19470,7 @@ Nvoid DEINIT_Timer(void)
 N{
 N	SIM->SCGC6 &= ~SIM_SCGC6_TPM0_MASK; //Not sure if this is the right way to do this but it works
 X	((SIM_Type *)(0x40047000u))->SCGC6 &= ~0x1000000u; 
-N	TPM0->CNT = (F_TPM_CLOCK/(F_TPM_OVERFLOW*32))-1;
-X	((TPM_Type *)(0x40038000u))->CNT = ((48000000)/((1000)*32))-1;
+N	//TPM0->CNT = (F_TPM_CLOCK/(F_TPM_OVERFLOW*32))-1;
 N}
 N
 Nint8_t Set_Sampling_Period(uint16_t period)
