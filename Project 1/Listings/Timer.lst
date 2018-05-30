@@ -11269,9 +11269,14 @@ N
 N/* MKL25Z4.h, eof. */
 L 5 ".\inc\Timer.h" 2
 N
+N#define F_TPM_CLOCK (48000000) //48 MHz
+N#define F_TPM_OVERFLOW (1000) //1KHz overflow = 1 overflow per ms
+N
 Nvoid INIT_Timer(void);
 N
 Nint8_t Set_Sampling_Period(uint16_t period);
+N
+Nvoid Timer_Delay(void); //Delays by the period set via Set_Sampling_Period
 N
 N#endif
 N/////
@@ -19438,6 +19443,28 @@ L 3 "src\Timer.c" 2
 N
 Nextern volatile uint16_t g_sample_period; //stored in MS;
 N
+Nvoid INIT_Timer(void) //Taken from Chaper 7 page 197 of textbook
+N{
+N	SIM->SCGC6 |= SIM_SCGC6_TPM0_MASK;
+X	((SIM_Type *)(0x40047000u))->SCGC6 |= 0x1000000u;
+N	
+N	SIM->SOPT2 |= (SIM_SOPT2_TPMSRC(1) | SIM_SOPT2_PLLFLLSEL_MASK);
+X	((SIM_Type *)(0x40047000u))->SOPT2 |= ((((uint32_t)(((uint32_t)(1))<<24))&0x3000000u) | 0x10000u);
+N	
+N	TPM0->MOD = (F_TPM_CLOCK/(F_TPM_OVERFLOW*32))-1;
+X	((TPM_Type *)(0x40038000u))->MOD = ((48000000)/((1000)*32))-1;
+N	
+N	TPM0->SC = TPM_SC_CMOD(1) | TPM_SC_PS(5) | TPM_SC_TOIE_MASK;
+X	((TPM_Type *)(0x40038000u))->SC = (((uint32_t)(((uint32_t)(1))<<3))&0x18u) | (((uint32_t)(((uint32_t)(5))<<0))&0x7u) | 0x40u;
+N	
+N	NVIC_SetPriority(TPM0_IRQn, 3);
+X	__NVIC_SetPriority(TPM0_IRQn, 3);
+N	NVIC_ClearPendingIRQ(TPM0_IRQn);
+X	__NVIC_ClearPendingIRQ(TPM0_IRQn);
+N	NVIC_EnableIRQ(TPM0_IRQn);
+X	__NVIC_EnableIRQ(TPM0_IRQn);
+N}
+N
 Nint8_t Set_Sampling_Period(uint16_t period)
 N{
 N	if(period < 1 || period > 60000)
@@ -19446,4 +19473,9 @@ N
 N	//do stuff
 N	g_sample_period = period;
 N	return 1;
+N}
+N
+Nvoid Timer_Delay(void)
+N{
+N	
 N}

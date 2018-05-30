@@ -36934,6 +36934,8 @@ N
 Nint8_t ADC_Set_Channel(uint16_t channel);
 Nint8_t ADC_Set_Num_Samples(uint16_t num);
 N
+Nuint16_t ADC_Get_Sample(void);
+N
 N#endif
 N///
 L 9 "src\main.c" 2
@@ -45102,9 +45104,14 @@ N
 N/* MKL25Z4.h, eof. */
 L 5 ".\inc\Timer.h" 2
 N
+N#define F_TPM_CLOCK (48000000) //48 MHz
+N#define F_TPM_OVERFLOW (1000) //1KHz overflow = 1 overflow per ms
+N
 Nvoid INIT_Timer(void);
 N
 Nint8_t Set_Sampling_Period(uint16_t period);
+N
+Nvoid Timer_Delay(void); //Delays by the period set via Set_Sampling_Period
 N
 N#endif
 N/////
@@ -45127,6 +45134,7 @@ N
 N	Init_UART0(115200);
 N	Init_RGB_LEDs();
 N	Init_state_debug_pins();
+N	INIT_Timer();
 N	
 N	State_set_LEDs(curr_state);
 N	State_set_debug_pins(curr_state);
@@ -45180,7 +45188,7 @@ N						if(ADC_Set_Channel(value) < 0)
 N							Send_Error("Bad ADC channel number!\n\r");
 N						else
 N						{
-W "src\main.c" 81 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 82 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N							sprintf(print_string, "Channel %i selected\n\r", value);
 N							Send_String_Poll(print_string);
 N						}
@@ -45191,7 +45199,7 @@ N						if(Set_Sampling_Period(value) < 0)
 N							Send_Error("Bad ADC sampling period!\n\r");
 N						else
 N						{
-W "src\main.c" 91 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 92 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N							sprintf(print_string, "Sampling period set to %i ms.", g_sample_period);
 N							Send_String_Poll(print_string);
 N						}
@@ -45201,7 +45209,7 @@ N						if(ADC_Set_Num_Samples(value) < 0)
 N							Send_Error("Bad number of samples!\n\r");
 N						else
 N						{
-W "src\main.c" 100 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 101 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N							sprintf(print_string, "Sample count set to %i.", g_num_adc_samples);
 N							Send_String_Poll(print_string);
 N						}
@@ -45210,7 +45218,7 @@ N
 N				break;
 N			case(SAMPLING_S):
 N				Send_String_Poll("\n\rStarting Recording.\n\r");
-W "src\main.c" 108 5 function "Delay" declared implicitly
+W "src\main.c" 109 5 function "Delay" declared implicitly
 N				Delay(1);
 N				next_state = CLI_S;
 N				break;
@@ -45219,7 +45227,7 @@ N				Delay(1);
 N				next_state = CLI_S;
 N				break;
 N			case(SENDING_DATA_S):
-W "src\main.c" 116 13 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 117 13 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N				sprintf(print_string, "Sending data (%i samples).\n\r", g_num_adc_samples);
 N				Send_String_Poll(print_string);
 N				Delay(1);
@@ -45239,4 +45247,11 @@ N		}
 N	}
 N}
 N
+Nvoid TPM0_IRQHandler()
+N{
+N	State_set_debug_pins(WAITING_S);
+N	TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
+X	((TPM_Type *)(0x40038000u))->SC |= 0x40u; 
+N	State_set_debug_pins(CLI_S);
+N}
 N// *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   

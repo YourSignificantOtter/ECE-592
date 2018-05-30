@@ -25,6 +25,7 @@ int main (void)
 	Init_UART0(115200);
 	Init_RGB_LEDs();
 	Init_state_debug_pins();
+	INIT_Timer();
 	
 	State_set_LEDs(curr_state);
 	State_set_debug_pins(curr_state);
@@ -132,4 +133,10 @@ int main (void)
 	}
 }
 
+void TPM0_IRQHandler()
+{
+	State_set_debug_pins(WAITING_S);
+	TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
+	State_set_debug_pins(CLI_S);
+}
 // *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   

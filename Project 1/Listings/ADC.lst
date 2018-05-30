@@ -11274,6 +11274,8 @@ N
 Nint8_t ADC_Set_Channel(uint16_t channel);
 Nint8_t ADC_Set_Num_Samples(uint16_t num);
 N
+Nuint16_t ADC_Get_Sample(void);
+N
 N#endif
 N///
 L 2 "src\ADC.c" 2
@@ -19440,6 +19442,11 @@ N
 Nextern volatile uint16_t g_voltage_samples[6000];
 Nextern volatile uint16_t g_num_adc_samples;
 N
+Nvoid INIT_ADC(void)
+N{
+N	
+N}
+N
 Nint8_t ADC_Set_Channel(uint16_t channel)
 N{
 N	static const uint8_t valid_channels[16] = { 0, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 23, 26, 27}; //all valid ADC Channels
@@ -19467,3 +19474,8 @@ N	g_num_adc_samples = num;
 N	return 1;
 N}
 N
+Nuint16_t ADC_Get_Sample(void)
+N{
+N	uint16_t value = 0;
+N	return value;
+N}
