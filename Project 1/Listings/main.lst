@@ -45108,6 +45108,7 @@ N#define F_TPM_CLOCK (48000000) //48 MHz
 N#define F_TPM_OVERFLOW (1000) //1KHz overflow = 1 overflow per ms
 N
 Nvoid INIT_Timer(void);
+Nvoid DEINIT_Timer(void);
 N
 Nint8_t Set_Sampling_Period(uint16_t period);
 N
@@ -45120,6 +45121,9 @@ N
 Nvolatile uint16_t g_voltage_samples[6000];
 Nvolatile uint16_t g_num_adc_samples = 100;
 Nvolatile uint16_t g_sample_period = 10; //stored in MS;
+Nvolatile uint16_t g_elapsed_ms = 0; //Num of 1ms irq's that have occured
+Nvolatile uint16_t g_values_recorded = 0;
+Nvolatile uint8_t g_waiting_flag = 0;
 N
 N
 Nint main (void) 
@@ -45134,7 +45138,6 @@ N
 N	Init_UART0(115200);
 N	Init_RGB_LEDs();
 N	Init_state_debug_pins();
-N	INIT_Timer();
 N	
 N	State_set_LEDs(curr_state);
 N	State_set_debug_pins(curr_state);
@@ -45188,7 +45191,7 @@ N						if(ADC_Set_Channel(value) < 0)
 N							Send_Error("Bad ADC channel number!\n\r");
 N						else
 N						{
-W "src\main.c" 82 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 84 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N							sprintf(print_string, "Channel %i selected\n\r", value);
 N							Send_String_Poll(print_string);
 N						}
@@ -45199,40 +45202,58 @@ N						if(Set_Sampling_Period(value) < 0)
 N							Send_Error("Bad ADC sampling period!\n\r");
 N						else
 N						{
-W "src\main.c" 92 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 94 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N							sprintf(print_string, "Sampling period set to %i ms.", g_sample_period);
 N							Send_String_Poll(print_string);
 N						}
 N					}
 N					else if(RX_String[0] == 'N' || RX_String[0] == 'n')
 N						if(ADC_Set_Num_Samples(value) < 0)
-N							Send_Error("Bad number of samples!\n\r");
-N						else
 N						{
-W "src\main.c" 101 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+N							Send_Error("Bad number of samples!\n\r");
+N						}
+N						else {
+W "src\main.c" 104 16 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N							sprintf(print_string, "Sample count set to %i.", g_num_adc_samples);
 N							Send_String_Poll(print_string);
 N						}
 N				}
+N				break;
 N				
-N				break;
 N			case(SAMPLING_S):
-N				Send_String_Poll("\n\rStarting Recording.\n\r");
-W "src\main.c" 109 5 function "Delay" declared implicitly
-N				Delay(1);
-N				next_state = CLI_S;
+N				if(g_values_recorded < g_num_adc_samples)
+N				{
+N					if(g_values_recorded == 0)
+N					{
+N						Send_String_Poll("\n\rStarting Recording.\n\r");
+N						INIT_Timer();
+N					}
+N					next_state = WAITING_S; // busy wait
+N				}
+N				else
+N				{
+N					DEINIT_Timer();
+N					next_state = CLI_S;
+N					g_values_recorded = 0;
+N				}
 N				break;
+N				
 N			case(WAITING_S):
-N				Delay(1);
-N				next_state = CLI_S;
+N				while(g_waiting_flag == 0)
+N					;
+N				next_state = SAMPLING_S;
+N				g_waiting_flag = 0;
 N				break;
+N				
 N			case(SENDING_DATA_S):
-W "src\main.c" 117 13 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+W "src\main.c" 136 13 argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
 N				sprintf(print_string, "Sending data (%i samples).\n\r", g_num_adc_samples);
 N				Send_String_Poll(print_string);
+W "src\main.c" 138 5 function "Delay" declared implicitly
 N				Delay(1);
 N				next_state = CLI_S;
 N				break;
+N			
 N			default:
 N				Send_String_Poll("ERROR! Invalid State Reached!\n\r");
 N				next_state = CLI_S;
@@ -45249,9 +45270,16 @@ N}
 N
 Nvoid TPM0_IRQHandler()
 N{
-N	State_set_debug_pins(WAITING_S);
-N	TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
-X	((TPM_Type *)(0x40038000u))->SC |= 0x40u; 
-N	State_set_debug_pins(CLI_S);
+N	if(g_elapsed_ms == g_sample_period)
+N	{
+N		ADC_Get_Sample();
+N		TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
+X		((TPM_Type *)(0x40038000u))->SC |= 0x40u; 
+N		g_elapsed_ms = 0;
+N		g_values_recorded++;
+N		g_waiting_flag = 1;
+N	}
+N	else
+N		g_elapsed_ms++; 
 N}
 N// *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   

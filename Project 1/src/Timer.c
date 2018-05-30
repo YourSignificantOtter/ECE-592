@@ -18,6 +18,12 @@ void INIT_Timer(void) //Taken from Chaper 7 page 197 of textbook
 	NVIC_EnableIRQ(TPM0_IRQn);
 }
 
+void DEINIT_Timer(void)
+{
+	SIM->SCGC6 &= ~SIM_SCGC6_TPM0_MASK; //Not sure if this is the right way to do this but it works
+	//TPM0->CNT = (F_TPM_CLOCK/(F_TPM_OVERFLOW*32))-1;
+}
+
 int8_t Set_Sampling_Period(uint16_t period)
 {
 	if(period < 1 || period > 60000)

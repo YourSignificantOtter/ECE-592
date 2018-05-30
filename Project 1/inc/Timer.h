@@ -7,6 +7,7 @@
 #define F_TPM_OVERFLOW (1000) //1KHz overflow = 1 overflow per ms
 
 void INIT_Timer(void);
+void DEINIT_Timer(void);
 
 int8_t Set_Sampling_Period(uint16_t period);
 

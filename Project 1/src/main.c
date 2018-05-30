@@ -11,6 +11,9 @@
 volatile uint16_t g_voltage_samples[6000];
 volatile uint16_t g_num_adc_samples = 100;
 volatile uint16_t g_sample_period = 10; //stored in MS;
+volatile uint16_t g_elapsed_ms = 0; //Num of 1ms irq's that have occured
+volatile uint16_t g_values_recorded = 0;
+volatile uint8_t g_waiting_flag = 0;
 
 
 int main (void) 
@@ -25,7 +28,6 @@ int main (void)
 	Init_UART0(115200);
 	Init_RGB_LEDs();
 	Init_state_debug_pins();
-	INIT_Timer();
 	
 	State_set_LEDs(curr_state);
 	State_set_debug_pins(curr_state);
@@ -95,30 +97,48 @@ int main (void)
 					}
 					else if(RX_String[0] == 'N' || RX_String[0] == 'n')
 						if(ADC_Set_Num_Samples(value) < 0)
-							Send_Error("Bad number of samples!\n\r");
-						else
 						{
+							Send_Error("Bad number of samples!\n\r");
+						}
+						else {
 							sprintf(print_string, "Sample count set to %i.", g_num_adc_samples);
 							Send_String_Poll(print_string);
 						}
 				}
+				break;
 				
-				break;
 			case(SAMPLING_S):
-				Send_String_Poll("\n\rStarting Recording.\n\r");
-				Delay(1);
-				next_state = CLI_S;
+				if(g_values_recorded < g_num_adc_samples)
+				{
+					if(g_values_recorded == 0)
+					{
+						Send_String_Poll("\n\rStarting Recording.\n\r");
+						INIT_Timer();
+					}
+					next_state = WAITING_S; // busy wait
+				}
+				else
+				{
+					DEINIT_Timer();
+					next_state = CLI_S;
+					g_values_recorded = 0;
+				}
 				break;
+				
 			case(WAITING_S):
-				Delay(1);
-				next_state = CLI_S;
+				while(g_waiting_flag == 0)
+					;
+				next_state = SAMPLING_S;
+				g_waiting_flag = 0;
 				break;
+				
 			case(SENDING_DATA_S):
 				sprintf(print_string, "Sending data (%i samples).\n\r", g_num_adc_samples);
 				Send_String_Poll(print_string);
 				Delay(1);
 				next_state = CLI_S;
 				break;
+			
 			default:
 				Send_String_Poll("ERROR! Invalid State Reached!\n\r");
 				next_state = CLI_S;
@@ -135,8 +155,15 @@ int main (void)
 
 void TPM0_IRQHandler()
 {
-	State_set_debug_pins(WAITING_S);
-	TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
-	State_set_debug_pins(CLI_S);
+	if(g_elapsed_ms == g_sample_period)
+	{
+		ADC_Get_Sample();
+		TPM0->SC |= TPM_SC_TOIE_MASK; //reset overflow flag
+		g_elapsed_ms = 0;
+		g_values_recorded++;
+		g_waiting_flag = 1;
+	}
+	else
+		g_elapsed_ms++; 
 }
 // *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   
