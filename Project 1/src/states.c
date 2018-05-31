@@ -71,7 +71,11 @@ State State_check_command_and_set_next_state(uint8_t command)
 	static const uint8_t valid_commands[10] = { 'R', 'r', 'S', 's', 'C', 'c', 'P', 'p', 'N', 'n'};
 	
 	if(command == valid_commands[0] || command == valid_commands[1])
+	{
+		Send_String_Poll("\n\rStarting Recording.\n\r"); //If we send this in the sampling state theres a timing error. sending this string takes ~2ms so we miss the first irq
+		//moving it here is bad practice but it works 
 		return SAMPLING_S;
+	}
 	else if(command == valid_commands[2] || command == valid_commands[3])
 		return SENDING_DATA_S;
 	else if(command == valid_commands[4] || command == valid_commands[5])
@@ -90,6 +94,7 @@ int Parse_Command(uint8_t * c, State * next_state)
 	*next_state = State_check_command_and_set_next_state( *c );
 	if(*next_state == INVALID_S)
 		return -1;
+	
 	*c++;
 	while(*c != '\0')
 	{
@@ -101,5 +106,11 @@ int Parse_Command(uint8_t * c, State * next_state)
 		else
 			return -1;
 	}
+	if(value != 0 && (*next_state == SAMPLING_S || *next_state == SENDING_DATA_S)) //If user enters anything after an R or an S throw error
+	{
+		*next_state = INVALID_S;
+		return -1;
+	}
+	
 	return value;
 }

@@ -7,3 +7,6 @@
 .\objects\adc.o: D:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include\cmsis_armcc.h
 .\objects\adc.o: .\RTE\Device\MKL25Z128xxx4\system_MKL25Z4.h
 .\objects\adc.o: D:\MDK\ARM\PACK\Keil\Kinetis_KLxx_DFP\1.14.0\Device\Include\MKL25Z4.H
+.\objects\adc.o: D:\MDK\ARM\ARMCC\Bin\..\include\math.h
+.\objects\adc.o: .\inc\UART.h
+.\objects\adc.o: D:\MDK\ARM\PACK\Keil\Kinetis_KLxx_DFP\1.14.0\Device\Include\MKL25Z4.H
