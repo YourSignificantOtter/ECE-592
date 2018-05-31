@@ -29147,6 +29147,9 @@ N
 Nextern volatile uint16_t g_voltage_samples[6000];
 Nextern volatile uint16_t g_num_adc_samples;
 N
+Nstatic const uint8_t valid_channels[10] = { 0, 3, 4, 6, 7, 11, 14, 23, 26, 27}; //all valid ADC Channels
+Nstatic uint8_t curr_channel = 0;
+N
 Nuint8_t Channel_to_port_pos(uint8_t channel)
 N{
 N	uint8_t pin_num;
@@ -29155,40 +29158,64 @@ N	{
 N		case 0:
 N			return 20;
 N		case 3:
-N			break;
+N			return 22;
 N		case 4:
-N			break;
+N			return 21;
 N		case 6:
-N			break;
+N			return 5;
 N		case 7:
-N			break;
+N			return 23;
 N		case 11:
-N			break;
+N			return 2;
 N		case 14:
-N			break;
+N			return 0;
 N		case 23:
-N			break;
+N			return 30;
 N		case 26:
-N			break;
+N			//The schematic has no attachment for this, neither does Table 6.6 in the Textbook
+N			return 20;
 N		case 27:
-N			break;
+N			//See comment above
+N			return 20;
 N		default:
 N			break;
 N	}
 N	return 1;
-W "src\ADC.c" 11 10 variable "pin_num"  was declared but never referenced
+W "src\ADC.c" 14 10 variable "pin_num"  was declared but never referenced
 N}
 N
 Nvoid INIT_ADC(void)
 N{
+N	uint8_t i = 0, this_Channel = 0;
 N	//Setup the pins for each of the channels
-N	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK | SIM_SCGC5_PORTD_MASK | SIM_SCGC5_PORTE_MASK;
-X	((SIM_Type *)(0x40047000u))->SCGC5 |= 0x2000u | 0x1000u | 0x2000u;
-N	
-N	PORTE->PCR[21] &= ~PORT_PCR_MUX_MASK;          
-X	((PORT_Type *)(0x4004D000u))->PCR[21] &= ~0x700u;          
-N	PORTE->PCR[21] |= PORT_PCR_MUX(0);
-X	((PORT_Type *)(0x4004D000u))->PCR[21] |= (((uint32_t)(((uint32_t)(0))<<8))&0x700u);
+N	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK | SIM_SCGC5_PORTD_MASK | SIM_SCGC5_PORTC_MASK;
+X	((SIM_Type *)(0x40047000u))->SCGC5 |= 0x2000u | 0x1000u | 0x800u;
+N	for(i = 0; i < 10; i ++)
+N	{
+N		this_Channel = valid_channels[i];
+N		if(this_Channel == 0 || this_Channel == 3 || this_Channel == 4 || this_Channel == 7 || this_Channel == 23)
+N		{
+N			PORTE->PCR[Channel_to_port_pos(this_Channel)]&= ~PORT_PCR_MUX_MASK;          
+X			((PORT_Type *)(0x4004D000u))->PCR[Channel_to_port_pos(this_Channel)]&= ~0x700u;          
+N			PORTE->PCR[Channel_to_port_pos(this_Channel)] |= PORT_PCR_MUX(0);
+X			((PORT_Type *)(0x4004D000u))->PCR[Channel_to_port_pos(this_Channel)] |= (((uint32_t)(((uint32_t)(0))<<8))&0x700u);
+N		}
+N		else if(this_Channel == 6)
+N		{
+N			PORTD->PCR[Channel_to_port_pos(this_Channel)]&= ~PORT_PCR_MUX_MASK;          
+X			((PORT_Type *)(0x4004C000u))->PCR[Channel_to_port_pos(this_Channel)]&= ~0x700u;          
+N			PORTD->PCR[Channel_to_port_pos(this_Channel)] |= PORT_PCR_MUX(0);
+X			((PORT_Type *)(0x4004C000u))->PCR[Channel_to_port_pos(this_Channel)] |= (((uint32_t)(((uint32_t)(0))<<8))&0x700u);
+N		}
+N		else if(this_Channel == 11 || this_Channel == 14)
+N		{
+N			PORTC->PCR[Channel_to_port_pos(this_Channel)]&= ~PORT_PCR_MUX_MASK;          
+X			((PORT_Type *)(0x4004B000u))->PCR[Channel_to_port_pos(this_Channel)]&= ~0x700u;          
+N			PORTC->PCR[Channel_to_port_pos(this_Channel)] |= PORT_PCR_MUX(0);
+X			((PORT_Type *)(0x4004B000u))->PCR[Channel_to_port_pos(this_Channel)] |= (((uint32_t)(((uint32_t)(0))<<8))&0x700u);
+N		}
+N			
+N	}
 N	
 N	//Put clock to ADC
 N	SIM->SCGC6 |= SIM_SCGC6_ADC0_MASK;
@@ -29199,8 +29226,8 @@ N	ADC0->CFG1 = ADC_CFG1_MODE(3) | ADC_CFG1_ADICLK(1);
 X	((ADC_Type *)(0x4003B000u))->CFG1 = (((uint32_t)(((uint32_t)(3))<<2))&0xCu) | (((uint32_t)(((uint32_t)(1))<<0))&0x3u);
 N	
 N	//Set the channel 
-N	ADC0_SC1A = ADC_SC1_ADCH(4);
-X	((((ADC_Type *)(0x4003B000u)))->SC1[0]) = (((uint32_t)(((uint32_t)(4))<<0))&0x1Fu);
+N	ADC0_SC1A = ADC_SC1_ADCH(0);
+X	((((ADC_Type *)(0x4003B000u)))->SC1[0]) = (((uint32_t)(((uint32_t)(0))<<0))&0x1Fu);
 N	
 N	// Default voltage ref
 N	ADC0->SC2 = ADC_SC2_REFSEL(0);
@@ -29209,13 +29236,15 @@ N}
 N
 Nint8_t ADC_Set_Channel(uint16_t channel)
 N{
-N	static const uint8_t valid_channels[10] = { 0, 3, 4, 6, 7, 11, 14, 23, 26, 27}; //all valid ADC Channels
 N	uint8_t i;
 N	for(i = 0; i < 10; i++)
 N	{
 N		if(channel == valid_channels[i])
 N		{
-N			//do stuff
+N			//Set the channel 
+N			ADC0_SC1A = ADC_SC1_ADCH(channel);
+X			((((ADC_Type *)(0x4003B000u)))->SC1[0]) = (((uint32_t)(((uint32_t)(channel))<<0))&0x1Fu);
+N			curr_channel = channel;
 N			return 1;
 N		}
 N	}
@@ -29238,8 +29267,8 @@ N{
 N	uint16_t the_val = 0;
 N	static uint16_t index = 0;
 N	//Start the conversion
-N	ADC0_SC1A = 4 & ADC_SC1_ADCH_MASK;
-X	((((ADC_Type *)(0x4003B000u)))->SC1[0]) = 4 & 0x1Fu;
+N	ADC0_SC1A = curr_channel & ADC_SC1_ADCH_MASK;
+X	((((ADC_Type *)(0x4003B000u)))->SC1[0]) = curr_channel & 0x1Fu;
 N	//Poll for completion
 N	while(!(ADC0_SC1A & ADC_SC1_COCO_MASK))
 X	while(!(((((ADC_Type *)(0x4003B000u)))->SC1[0]) & 0x80u))
@@ -29265,8 +29294,8 @@ N	uint8_t string[13];
 N	string[12] = '\0';
 N	while(index < g_num_adc_samples)
 N	{
-N		float voltage = g_voltage_samples[index] * (3.3f / 65535.0f);
-W "src\ADC.c" 116 3 function "sprintf" declared implicitly
+N		float voltage = g_voltage_samples[index] * (3.3f / 65535.0f); //Assuming the ADC reference voltage is 3.3V, so there is no "correction factor" needed
+W "src\ADC.c" 140 3 function "sprintf" declared implicitly
 N		sprintf(string, "%i: %4.3f V\n\r", index+1, voltage);
 N		Send_String_Poll(string);
 N		index++;
