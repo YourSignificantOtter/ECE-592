@@ -89,7 +89,7 @@ inline void SPI_CS_High (void){
 }
 
 inline void SPI_Freq_High (void) {
-		SPI1_BR = 0x04; 
+		SPI1_BR = 0x01; //Changed from 0x04
 }	
 
 inline void SPI_Freq_Low (void) {
