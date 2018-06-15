@@ -17,7 +17,7 @@
 ******************************************************************************/
 
 void SPI_Init (void) {
-	
+		
     SIM_SCGC5 |= SIM_SCGC5_PORTE_MASK;
     /*
      *SPI1 Clock gate control. 1 clock enabled

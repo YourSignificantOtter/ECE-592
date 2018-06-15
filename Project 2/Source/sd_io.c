@@ -188,6 +188,9 @@ DWORD __SD_Sectors (SD_DEV *dev)
 
 SDRESULTS SD_Init(SD_DEV *dev)
 {
+		PTB->PCOR = MASK(DBG_7);
+		PTB->PSOR = MASK(DBG_5);
+	
     BYTE n, cmd, ct, ocr[4];
     BYTE idx;
     BYTE init_trys;
@@ -275,18 +278,29 @@ SDRESULTS SD_Init(SD_DEV *dev)
         __SD_Speed_Transfer(HIGH); // High speed transfer
     }
     SPI_Release();
+		
+		PTB->PCOR = MASK(DBG_5);
+		PTB->PSOR = MASK(DBG_7);
+		
     return (ct ? SD_OK : SD_NOINIT);
 }
 
 SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
 {
+		PTB->PCOR = MASK(DBG_7);
+		PTB->PSOR = MASK(DBG_2);
+	
     SDRESULTS res;
     BYTE tkn, data;
     WORD byte_num;
 		
     res = SD_ERROR;
-    if ((sector > dev->last_sector)||(cnt == 0)) 
+    if ((sector > dev->last_sector)||(cnt == 0))
+		{
+			PTB->PCOR = MASK(DBG_2);
+			PTB->PSOR = MASK(DBG_7);
 			return(SD_PARERR);
+		}
     // Convert sector number to byte address (sector * SD_BLK_SIZE)
     if (__SD_Send_Cmd(CMD17, sector * SD_BLK_SIZE) == 0) {
         SPI_Timer_On(100);  // Wait for data packet (timeout of 100ms)
@@ -310,16 +324,25 @@ SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
     }
     SPI_Release();
     dev->debug.read++;
+		
+		PTB->PCOR = MASK(DBG_2);
+		PTB->PSOR = MASK(DBG_7);
+		
     return(res);
 }
 
 SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 {
+		PTB->PCOR = MASK(DBG_7);
+		PTB->PSOR = MASK(DBG_3);
+	
     WORD idx;
     BYTE line;
 
 		// Query invalid?
     if(sector > dev->last_sector) {
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
 				return(SD_PARERR);
 		}
 
@@ -335,6 +358,8 @@ SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 			SPI_RW(0xFF);
 			// If not accepted, returns the reject error
 			if((SPI_RW(0xFF) & 0x1F) != 0x05) {
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
 				return(SD_REJECT);
 			}
 			
@@ -346,11 +371,21 @@ SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 			SPI_Timer_Off();
 			dev->debug.write++;
 			if(line==0) 
+			{
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
 				return(SD_BUSY);
-			else 
-				return(SD_OK);	
+			}
+			else
+			{
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				return(SD_OK);
+			}
 		}
     else {
+			PTB->PCOR = MASK(DBG_3);
+			PTB->PSOR = MASK(DBG_7);
 			return(SD_ERROR);
 		}
 }

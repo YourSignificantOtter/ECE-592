@@ -13,6 +13,8 @@ void test_write(void) {
 	// Write test data to given block (sector_num) in flash. 
 	// Read it back, compute simple checksum to confirm it is correct.
 	
+	PTB->PSOR = MASK(DBG_7);
+	
 	int i;
 	DWORD sector_num = 0x23; // Manual wear leveling
   SDRESULTS res;
