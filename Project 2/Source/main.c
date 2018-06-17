@@ -17,7 +17,10 @@ void test_write(void) {
 	
 	int i;
 	DWORD sector_num = 0x23; // Manual wear leveling
-  SDRESULTS res;
+  SDRESULTS res = SD_ERROR;
+	FSM_SD_RETURN_TYPE fsm_res;
+	fsm_res.result = SD_ERROR;
+	fsm_res.state = FSM_BUSY;
 	
 	// Erase buffer
 	for (i=0; i<SD_BLK_SIZE; i++)
@@ -43,7 +46,12 @@ void test_write(void) {
 			for (i=0; i<SD_BLK_SIZE; i++)
 				buffer[i] = 0;
 			// read block again
-			res = SD_Read(dev, (void*)buffer, sector_num, 0, 512);
+			//res = SD_Read(dev, (void*)buffer, sector_num, 0, 512);
+			do
+			{
+				fsm_res = SD_Read_FSM(dev, (void*)buffer, sector_num, 0, 512); 
+			}	while(fsm_res.state == FSM_BUSY);
+			res = fsm_res.result;
 			
 			if(res==SD_OK) {
 				for (i = 0, sum = 0; i < SD_BLK_SIZE; i++)

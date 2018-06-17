@@ -59,6 +59,16 @@ typedef enum {
     SD_NORESPONSE   /* 6: No response           */
 } SDRESULTS;
 
+typedef enum{
+	FSM_IDLE = 0,
+	FSM_BUSY
+} FSM_STATE;
+
+typedef struct {
+	SDRESULTS result;
+	FSM_STATE state;
+} FSM_SD_RETURN_TYPE;
+
 typedef struct _DBG_COUNT {
     WORD read;
     WORD write;
@@ -83,6 +93,8 @@ typedef struct _SD_DEV {
  */
 SDRESULTS SD_Init (SD_DEV *dev);
 
+SDRESULTS SD_Init_FSM (SD_DEV *dev);
+
 /**
     \brief Read a single block.
     \param dest Pointer to the destination object to put data
@@ -92,6 +104,7 @@ SDRESULTS SD_Init (SD_DEV *dev);
     \return If all goes well returns SD_OK.
  */
 SDRESULTS SD_Read (SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt);
+FSM_SD_RETURN_TYPE SD_Read_FSM (SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt);
 
 /**
     \brief Write a single block.
@@ -100,6 +113,7 @@ SDRESULTS SD_Read (SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt);
     \return If all goes well returns SD_OK.
  */
 SDRESULTS SD_Write (SD_DEV *dev, void *dat, DWORD sector);
+SDRESULTS SD_Write_FSM (SD_DEV *dev, void *dat, DWORD sector);
 
 /**
     \brief Allows know status of SD card.

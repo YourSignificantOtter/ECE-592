@@ -285,6 +285,120 @@ SDRESULTS SD_Init(SD_DEV *dev)
     return (ct ? SD_OK : SD_NOINIT);
 }
 
+SDRESULTS SD_Init_FSM(SD_DEV *dev)
+{
+		//Declare the states for this FSM
+		static enum {ST_S1, ST_S2} next_state = ST_S1;
+		
+		switch(next_state)
+		{
+			case ST_S1:
+				
+				break;
+			case ST_S2:
+				
+				break;
+			default:
+				break;
+		}
+	
+		PTB->PCOR = MASK(DBG_7);
+		PTB->PSOR = MASK(DBG_5);
+	
+    BYTE n, cmd, ct, ocr[4];
+    BYTE idx;
+    BYTE init_trys;
+	
+    ct = 0;
+    for(init_trys=0; ((init_trys!=SD_INIT_TRYS)&&(!ct)); init_trys++)
+    {
+        // Initialize SPI for use with the memory card
+        SPI_Init();
+
+        SPI_CS_High();
+        SPI_Freq_Low();
+
+        // 80 dummy clocks
+        for(idx = 0; idx != 10; idx++) 
+					SPI_RW(0xFF);
+
+        SPI_Timer_On(500);
+        while(SPI_Timer_Status()==TRUE) {
+				}
+        SPI_Timer_Off();
+
+        dev->mount = FALSE;
+        SPI_Timer_On(500);
+        while ((__SD_Send_Cmd(CMD0, 0) != 1)&&(SPI_Timer_Status()==TRUE)) {
+				}
+	      SPI_Timer_Off();
+        // Idle state
+        if (__SD_Send_Cmd(CMD0, 0) == 1) {                      
+            // SD version 2?
+            if (__SD_Send_Cmd(CMD8, 0x1AA) == 1) {
+                // Get trailing return value of R7 resp
+                for (n = 0; n < 4; n++) 
+									ocr[n] = SPI_RW(0xFF);
+                // VDD range of 2.7-3.6V is OK?  
+                if ((ocr[2] == 0x01)&&(ocr[3] == 0xAA))
+                {
+                    // Wait for leaving idle state (ACMD41 with HCS bit)...
+                    SPI_Timer_On(1000);
+                    while ((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(ACMD41, 1UL << 30))) {
+										}
+                    SPI_Timer_Off(); 
+                    // CCS in the OCR? 
+										// AGD: Delete SPI_Timer_Status call?
+                    if ((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(CMD58, 0) == 0))
+                    {
+                        for (n = 0; n < 4; n++) 
+													ocr[n] = SPI_RW(0xFF);
+                        // SD version 2?
+                        ct = (ocr[0] & 0x40) ? SDCT_SD2 | SDCT_BLOCK : SDCT_SD2;
+                    }
+                }
+            } else {
+                // SD version 1 or MMC?
+                if (__SD_Send_Cmd(ACMD41, 0) <= 1)
+                {
+                    // SD version 1
+                    ct = SDCT_SD1; 
+                    cmd = ACMD41;
+                } else {
+                    // MMC version 3
+                    ct = SDCT_MMC; 
+                    cmd = CMD1;
+                }
+                // Wait for leaving idle state
+                SPI_Timer_On(250);
+                while((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(cmd, 0))) {
+								}
+                SPI_Timer_Off();
+                if(SPI_Timer_Status()==FALSE) 
+									ct = 0;
+                if(__SD_Send_Cmd(CMD59, 0))   
+									ct = 0;   // Deactivate CRC check (default)
+                if(__SD_Send_Cmd(CMD16, 512)) 
+									ct = 0;   // Set R/W block length to 512 bytes
+            }
+        }
+    }
+    if(ct) {
+        dev->cardtype = ct;
+        dev->mount = TRUE;
+        dev->last_sector = __SD_Sectors(dev) - 1;
+        dev->debug.read = 0;
+        dev->debug.write = 0;
+        __SD_Speed_Transfer(HIGH); // High speed transfer
+    }
+    SPI_Release();
+		
+		PTB->PCOR = MASK(DBG_5);
+		PTB->PSOR = MASK(DBG_7);
+		
+    return (ct ? SD_OK : SD_NOINIT);
+}
+
 SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
 {
 		PTB->PCOR = MASK(DBG_7);
@@ -331,7 +445,217 @@ SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
     return(res);
 }
 
+FSM_SD_RETURN_TYPE SD_Read_FSM(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
+{
+		PTB->PCOR = MASK(DBG_7);
+		PTB->PSOR = MASK(DBG_2);
+	
+		static SD_DEV *dev_fsm;
+		static DWORD sector_fsm;
+		static WORD ofs_fsm, cnt_fsm;
+	
+		static FSM_SD_RETURN_TYPE res;
+    static BYTE tkn, data;
+    static WORD byte_num = 0;
+		
+		//Declare states for this FSM
+		static enum {ST_S1, ST_S2, ST_S3, ST_S4, ST_RET} next_state = ST_S1;
+		
+		switch(next_state)
+		{
+			case ST_S1:
+				dev_fsm = dev;
+				sector_fsm = sector;
+				ofs_fsm = ofs;
+				cnt_fsm = cnt;
+			
+				res.result = SD_ERROR;
+				res.state = FSM_BUSY;
+				if ((sector > dev->last_sector)||(cnt == 0))
+				{
+					PTB->PCOR = MASK(DBG_2);
+					PTB->PSOR = MASK(DBG_7);
+					res.result = SD_PARERR;
+					res.state = FSM_IDLE;
+					next_state = ST_S1;
+					return(res);
+				}
+
+				// Convert sector number to byte address (sector * SD_BLK_SIZE)
+				if (__SD_Send_Cmd(CMD17, sector_fsm * SD_BLK_SIZE) == 0)
+					next_state = ST_S4;
+				else
+					next_state = ST_RET;
+				
+				PTB->PCOR = MASK(DBG_2);
+				PTB->PSOR = MASK(DBG_7);
+				
+				return res;
+			
+			case ST_S4:
+				SPI_Timer_On(100);  // Wait for data packet (timeout of 100ms)
+				next_state = ST_S2;
+			
+				PTB->PCOR = MASK(DBG_2);
+				PTB->PSOR = MASK(DBG_7);
+				
+				return res;
+			
+			case ST_S2:
+					//SPI_Timer_On(100);  // Wait for data packet (timeout of 100ms)
+					if(SPI_Timer_Status() == TRUE)
+						tkn = SPI_RW(0xFF);
+					else {
+						SPI_Timer_Off();
+						next_state = ST_RET;
+						PTB->PCOR = MASK(DBG_2);
+						PTB->PSOR = MASK(DBG_7);	
+					
+						return res; // state = busy, result = error
+					}
+					
+					if(tkn == 0xFF)
+						next_state = ST_S2;
+					else if(tkn == 0xFE)
+					{
+						SPI_Timer_Off();
+						next_state = ST_S3;
+					}
+					else
+					{
+						SPI_Timer_Off();
+						next_state = ST_RET;
+					}
+					
+				PTB->PCOR = MASK(DBG_2);
+				PTB->PSOR = MASK(DBG_7);	
+					
+				return res; // state = busy, result = error
+			
+			case ST_S3:
+					if(byte_num < SD_BLK_SIZE + 2)
+					{
+						data = SPI_RW(0xff);
+						if ((byte_num >= ofs_fsm) && (byte_num < ofs_fsm+cnt_fsm)) {
+							 *(BYTE*)dat = data;
+							 ((BYTE *) dat)++;
+						} // else discard bytes before and after data
+						byte_num++;
+					}
+					else
+					{
+						res.result = SD_OK;
+						next_state = ST_RET;
+					}
+			
+					PTB->PCOR = MASK(DBG_2);
+					PTB->PSOR = MASK(DBG_7);
+				
+					return res;
+			/*
+				byte_num = 0;
+				do {
+					data = SPI_RW(0xff);
+					if ((byte_num >= ofs_fsm) && (byte_num < ofs_fsm+cnt_fsm)) {
+						 *(BYTE*)dat = data;
+						 ((BYTE *) dat)++;
+					} // else discard bytes before and after data
+				} while(++byte_num < SD_BLK_SIZE + 2 ); // 512 byte block + 2 byte CRC
+				res.result = SD_OK;
+				next_state = ST_RET;
+				
+				PTB->PCOR = MASK(DBG_2);
+				PTB->PSOR = MASK(DBG_7);
+				
+				return res;
+			*/
+			case ST_RET:
+				SPI_Release();
+				dev_fsm->debug.read++;
+		
+				PTB->PCOR = MASK(DBG_2);
+				PTB->PSOR = MASK(DBG_7);
+				
+				//Reset our statics
+				next_state = ST_S1;
+				byte_num = 0;
+				tkn = 0;
+				data = 0;
+				res.state = FSM_IDLE;
+				return(res);
+			
+			default:
+				next_state = ST_RET;
+				res.result = SD_ERROR;
+				res.state = FSM_IDLE;
+			
+				PTB->PCOR = MASK(DBG_2);
+				PTB->PSOR = MASK(DBG_7);
+			
+				return res;
+		}
+}
+
 SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
+{
+		PTB->PCOR = MASK(DBG_7);
+		PTB->PSOR = MASK(DBG_3);
+	
+    WORD idx;
+    BYTE line;
+
+		// Query invalid?
+    if(sector > dev->last_sector) {
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				return(SD_PARERR);
+		}
+
+    // Convert sector number to bytes address (sector * SD_BLK_SIZE)
+    if(__SD_Send_Cmd(CMD24, sector * SD_BLK_SIZE)==0) {
+			// Send token (single block write)
+			SPI_RW(0xFE);
+			// Send block data
+			for(idx=0; idx!=SD_BLK_SIZE; idx++) 
+				SPI_RW(*((BYTE*)dat + idx));
+			/* Dummy CRC */
+			SPI_RW(0xFF);
+			SPI_RW(0xFF);
+			// If not accepted, returns the reject error
+			if((SPI_RW(0xFF) & 0x1F) != 0x05) {
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				return(SD_REJECT);
+			}
+			
+			// Waits until finish of data programming with a timeout
+			SPI_Timer_On(SD_IO_WRITE_TIMEOUT_WAIT);
+			do {
+					line = SPI_RW(0xFF);
+			} while((line==0)&&(SPI_Timer_Status()==TRUE));
+			SPI_Timer_Off();
+			dev->debug.write++;
+			if(line==0) 
+			{
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				return(SD_BUSY);
+			}
+			else
+			{
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				return(SD_OK);
+			}
+		}
+    else {
+			PTB->PCOR = MASK(DBG_3);
+			PTB->PSOR = MASK(DBG_7);
+			return(SD_ERROR);
+		}
+}
+
+SDRESULTS SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 {
 		PTB->PCOR = MASK(DBG_7);
 		PTB->PSOR = MASK(DBG_3);
