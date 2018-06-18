@@ -39,8 +39,11 @@ void test_write(void) {
 
   if(SD_Init(dev)==SD_OK) {
 		// Change the data in this sector
-		res = SD_Write(dev, (void*)buffer, sector_num);
-		if(res==SD_OK) {
+		//res = SD_Write(dev, (void*)buffer, sector_num);
+		do {
+			fsm_res = SD_Write_FSM(dev, (void*)buffer, sector_num);
+	}while(fsm_res.state == FSM_BUSY);
+		if(fsm_res.state == SD_OK) {
 			Control_RGB_LEDs(0,0,1);	// Blue - written ok
 			// erase buffer
 			for (i=0; i<SD_BLK_SIZE; i++)

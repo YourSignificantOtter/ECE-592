@@ -507,7 +507,6 @@ FSM_SD_RETURN_TYPE SD_Read_FSM(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, W
 				return res;
 			
 			case ST_S2:
-					//SPI_Timer_On(100);  // Wait for data packet (timeout of 100ms)
 					if(SPI_Timer_Status() == TRUE)
 						tkn = SPI_RW(0xFF);
 					else {
@@ -671,35 +670,115 @@ FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 				idx = 0;
 				line = 0;
 				
-						// Query invalid?
+				// Query invalid?
 				if(sector > dev->last_sector) {
-						PTB->PCOR = MASK(DBG_3);
-						PTB->PSOR = MASK(DBG_7);
-						res.state = FSM_IDLE;
-						res.result = SD_PARERR;
-						return res;
+					PTB->PCOR = MASK(DBG_3);
+					PTB->PSOR = MASK(DBG_7);
+					next_state = ST_S1;
+					res.state = FSM_IDLE;
+					res.result = SD_PARERR;
+					return res;
 				}
-				next_state = ST_S2;
+				
+				if(__SD_Send_Cmd(CMD24, sector * SD_BLK_SIZE)==0)
+				{
+					// Send token (single block write)
+					SPI_RW(0xFE);
+					next_state = ST_S2;
+				}
+				else
+				{
+					res.state = FSM_IDLE;
+					next_state = ST_RET;
+				}
+				
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
 				return res;
 			
 			case ST_S2:
-
+				if(idx != SD_BLK_SIZE)
+				{
+					SPI_RW(*((BYTE*)dat + idx));
+					idx++;
+					PTB->PCOR = MASK(DBG_3);
+					PTB->PSOR = MASK(DBG_7);
+					return res; //loop the FSM calls until we are done
+				}
+				
+				/* Dummy CRC */
+				SPI_RW(0xFF);
+				SPI_RW(0xFF);
+				// If not accepted, returns the reject error
+				if((SPI_RW(0xFF) & 0x1F) != 0x05) {
+					PTB->PCOR = MASK(DBG_3);
+					PTB->PSOR = MASK(DBG_7);
+					res.result = SD_REJECT;
+					next_state = ST_RET;
+					return res;
+				}
+				
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				next_state = ST_S3;
 				return res;
 			
 			case ST_S3:
-				
+				SPI_Timer_On(SD_IO_WRITE_TIMEOUT_WAIT);
+				next_state = ST_S4;
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
 				return res;
 			
 			case ST_S4:
+				if(SPI_Timer_Status()==TRUE)
+					line = SPI_RW(0xFF);
+				else
+				{
+					SPI_Timer_Off();
+					PTB->PCOR = MASK(DBG_3);
+					PTB->PSOR = MASK(DBG_7);
+					res.result = SD_BUSY;
+					next_state = ST_RET;
+					return res;
+				}
 				
-				return res;
+				if(line == 0)
+				{
+					dev->debug.write++;
+					PTB->PCOR = MASK(DBG_3);
+					PTB->PSOR = MASK(DBG_7);
+					res.result = SD_BUSY;
+					next_state = ST_RET;
+					return res;
+				}
+				else
+				{
+					PTB->PCOR = MASK(DBG_3);
+					PTB->PSOR = MASK(DBG_7);
+					res.result = SD_OK;
+					next_state = ST_RET;
+					return(res);
+				}
+					
 			
 			case ST_RET:
-				
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				res.state = FSM_IDLE;
+				// Reset the statics
+				next_state = ST_S1;
+				idx = 0;
+				line = 0;
 				return res;
 			
 			default:
-				
+				next_state = ST_RET;
+				res.result = SD_ERROR;
+				res.state = FSM_IDLE;
+			
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
 				return res;
 		}
 		

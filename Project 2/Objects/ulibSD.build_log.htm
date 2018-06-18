@@ -28,25 +28,25 @@ Project File Date:  06/17/2018
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\MDK\ARM\ARMCC\Bin'
 Rebuild target 'Target 1'
 assembling startup_MKL25Z4.s...
-compiling debug.c...
-compiling main.c...
-compiling system_MKL25Z4.c...
 compiling LEDs.c...
+compiling main.c...
+compiling debug.c...
 compiling spi_io.c...
+compiling system_MKL25Z4.c...
 compiling sd_io.c...
 Source\sd_io.c(436): warning:  #1441-D: nonstandard cast on lvalue
                  ((BYTE *) dat)++;
-Source\sd_io.c(547): warning:  #1441-D: nonstandard cast on lvalue
+Source\sd_io.c(546): warning:  #1441-D: nonstandard cast on lvalue
   							 ((BYTE *) dat_fsm)++;
-Source\sd_io.c(709): warning:  #111-D: statement is unreachable
+Source\sd_io.c(788): warning:  #111-D: statement is unreachable
       if(__SD_Send_Cmd(CMD24, sector * SD_BLK_SIZE)==0) {
-Source\sd_io.c(653): warning:  #550-D: variable "dev_fsm"  was set but never used
+Source\sd_io.c(652): warning:  #550-D: variable "dev_fsm"  was set but never used
   		static SD_DEV *dev_fsm;
-Source\sd_io.c(654): warning:  #550-D: variable "sector_fsm"  was set but never used
+Source\sd_io.c(653): warning:  #550-D: variable "sector_fsm"  was set but never used
   		static DWORD sector_fsm;
 Source\sd_io.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=3552 RO-data=224 RW-data=48 ZI-data=1648  
+Program Size: Code=3972 RO-data=224 RW-data=48 ZI-data=1648  
 ".\Objects\ulibSD.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -72,12 +72,12 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: Keil::Device:Startup:2.5.0
-      Source file:   Device\Source\ARM\startup_MKL25Z4.s
-      Include file:  Device\Source\system_MKL25Z4.h
       Source file:   Device\Source\system_MKL25Z4.c
+      Include file:  Device\Source\system_MKL25Z4.h
+      Source file:   Device\Source\ARM\startup_MKL25Z4.s
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>
