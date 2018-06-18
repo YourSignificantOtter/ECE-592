@@ -671,7 +671,7 @@ FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 				line = 0;
 				
 				// Query invalid?
-				if(sector > dev->last_sector) {
+				if(sector_fsm > dev_fsm->last_sector) {
 					PTB->PCOR = MASK(DBG_3);
 					PTB->PSOR = MASK(DBG_7);
 					next_state = ST_S1;
@@ -680,7 +680,7 @@ FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 					return res;
 				}
 				
-				if(__SD_Send_Cmd(CMD24, sector * SD_BLK_SIZE)==0)
+				if(__SD_Send_Cmd(CMD24, sector_fsm * SD_BLK_SIZE)==0)
 				{
 					// Send token (single block write)
 					SPI_RW(0xFE);
@@ -731,10 +731,11 @@ FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 				return res;
 			
 			case ST_S4:
-				if(SPI_Timer_Status()==TRUE)
+				if(SPI_Timer_Status()==TRUE && line == 0x00)
 					line = SPI_RW(0xFF);
-				else
+				else if(SPI_Timer_Status() == FALSE)
 				{
+					dev_fsm->debug.write++;
 					SPI_Timer_Off();
 					PTB->PCOR = MASK(DBG_3);
 					PTB->PSOR = MASK(DBG_7);
@@ -742,25 +743,18 @@ FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 					next_state = ST_RET;
 					return res;
 				}
-				
-				if(line == 0)
+				else if(line != 0 && SPI_Timer_Status() == TRUE)
 				{
-					dev->debug.write++;
-					PTB->PCOR = MASK(DBG_3);
-					PTB->PSOR = MASK(DBG_7);
-					res.result = SD_BUSY;
-					next_state = ST_RET;
-					return res;
-				}
-				else
-				{
+					dev_fsm->debug.write++;
 					PTB->PCOR = MASK(DBG_3);
 					PTB->PSOR = MASK(DBG_7);
 					res.result = SD_OK;
 					next_state = ST_RET;
 					return(res);
 				}
-					
+				PTB->PCOR = MASK(DBG_3);
+				PTB->PSOR = MASK(DBG_7);
+				return res;
 			
 			case ST_RET:
 				PTB->PCOR = MASK(DBG_3);
@@ -780,59 +774,6 @@ FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 				PTB->PCOR = MASK(DBG_3);
 				PTB->PSOR = MASK(DBG_7);
 				return res;
-		}
-		
-		
-
-    // Convert sector number to bytes address (sector * SD_BLK_SIZE)
-    if(__SD_Send_Cmd(CMD24, sector * SD_BLK_SIZE)==0) {
-			// Send token (single block write)
-			SPI_RW(0xFE);
-			// Send block data
-			for(idx=0; idx!=SD_BLK_SIZE; idx++) 
-				SPI_RW(*((BYTE*)dat + idx));
-			/* Dummy CRC */
-			SPI_RW(0xFF);
-			SPI_RW(0xFF);
-			// If not accepted, returns the reject error
-			if((SPI_RW(0xFF) & 0x1F) != 0x05) {
-				PTB->PCOR = MASK(DBG_3);
-				PTB->PSOR = MASK(DBG_7);
-				res.result = SD_REJECT;
-				res.state = FSM_IDLE;
-				return res;
-			}
-			
-			// Waits until finish of data programming with a timeout
-			SPI_Timer_On(SD_IO_WRITE_TIMEOUT_WAIT);
-			do {
-					line = SPI_RW(0xFF);
-			} while((line==0)&&(SPI_Timer_Status()==TRUE));
-			SPI_Timer_Off();
-			dev->debug.write++;
-			if(line==0) 
-			{
-				PTB->PCOR = MASK(DBG_3);
-				PTB->PSOR = MASK(DBG_7);
-				res.result = SD_BUSY;
-				res.state = FSM_IDLE;
-				return(res);
-			}
-			else
-			{
-				PTB->PCOR = MASK(DBG_3);
-				PTB->PSOR = MASK(DBG_7);
-				res.result = SD_OK;
-				res.state = FSM_IDLE;
-				return(res);
-			}
-		}
-    else {
-			PTB->PCOR = MASK(DBG_3);
-			PTB->PSOR = MASK(DBG_7);
-			res.result = SD_ERROR;
-			res.state = FSM_IDLE;
-			return(res);
 		}
 }
 
