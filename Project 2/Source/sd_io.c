@@ -285,11 +285,11 @@ SDRESULTS SD_Init(SD_DEV *dev)
     return (ct ? SD_OK : SD_NOINIT);
 }
 
-SDRESULTS SD_Init_FSM(SD_DEV *dev)
+FSM_SD_RETURN_TYPE SD_Init_FSM(SD_DEV *dev)
 {
 		//Declare the states for this FSM
 		static enum {ST_S1, ST_S2} next_state = ST_S1;
-		
+		static FSM_SD_RETURN_TYPE res;
 		switch(next_state)
 		{
 			case ST_S1:
@@ -396,7 +396,10 @@ SDRESULTS SD_Init_FSM(SD_DEV *dev)
 		PTB->PCOR = MASK(DBG_5);
 		PTB->PSOR = MASK(DBG_7);
 		
-    return (ct ? SD_OK : SD_NOINIT);
+		
+		res.state = FSM_IDLE;
+		res.result = ct ? SD_OK : SD_NOINIT;
+    return res;//ct ? SD_OK : SD_NOINIT);
 }
 
 SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
@@ -451,6 +454,7 @@ FSM_SD_RETURN_TYPE SD_Read_FSM(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, W
 		PTB->PSOR = MASK(DBG_2);
 	
 		static SD_DEV *dev_fsm;
+		static void * dat_fsm;
 		static DWORD sector_fsm;
 		static WORD ofs_fsm, cnt_fsm;
 	
@@ -465,6 +469,7 @@ FSM_SD_RETURN_TYPE SD_Read_FSM(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, W
 		{
 			case ST_S1:
 				dev_fsm = dev;
+				dat_fsm = dat;
 				sector_fsm = sector;
 				ofs_fsm = ofs;
 				cnt_fsm = cnt;
@@ -533,12 +538,13 @@ FSM_SD_RETURN_TYPE SD_Read_FSM(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, W
 				return res; // state = busy, result = error
 			
 			case ST_S3:
+				
 					if(byte_num < SD_BLK_SIZE + 2)
 					{
 						data = SPI_RW(0xff);
 						if ((byte_num >= ofs_fsm) && (byte_num < ofs_fsm+cnt_fsm)) {
-							 *(BYTE*)dat = data;
-							 ((BYTE *) dat)++;
+							 *(BYTE*)dat_fsm = data;
+							 ((BYTE *) dat_fsm)++;
 						} // else discard bytes before and after data
 						byte_num++;
 					}
@@ -552,23 +558,7 @@ FSM_SD_RETURN_TYPE SD_Read_FSM(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, W
 					PTB->PSOR = MASK(DBG_7);
 				
 					return res;
-			/*
-				byte_num = 0;
-				do {
-					data = SPI_RW(0xff);
-					if ((byte_num >= ofs_fsm) && (byte_num < ofs_fsm+cnt_fsm)) {
-						 *(BYTE*)dat = data;
-						 ((BYTE *) dat)++;
-					} // else discard bytes before and after data
-				} while(++byte_num < SD_BLK_SIZE + 2 ); // 512 byte block + 2 byte CRC
-				res.result = SD_OK;
-				next_state = ST_RET;
-				
-				PTB->PCOR = MASK(DBG_2);
-				PTB->PSOR = MASK(DBG_7);
-				
-				return res;
-			*/
+			
 			case ST_RET:
 				SPI_Release();
 				dev_fsm->debug.read++;
@@ -655,20 +645,65 @@ SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 		}
 }
 
-SDRESULTS SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
+FSM_SD_RETURN_TYPE SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 {
 		PTB->PCOR = MASK(DBG_7);
 		PTB->PSOR = MASK(DBG_3);
 	
-    WORD idx;
-    BYTE line;
+		static SD_DEV *dev_fsm;
+		static DWORD sector_fsm;
+	
+	
+		static FSM_SD_RETURN_TYPE res;
+    static WORD idx;
+    static BYTE line;
+	
+		//Declare states for this FSM
+		static enum {ST_S1, ST_S2, ST_S3, ST_S4, ST_RET} next_state = ST_S1;
 
-		// Query invalid?
-    if(sector > dev->last_sector) {
-				PTB->PCOR = MASK(DBG_3);
-				PTB->PSOR = MASK(DBG_7);
-				return(SD_PARERR);
+		switch(next_state)
+		{
+			case ST_S1:
+				dev_fsm = dev;
+				sector_fsm = sector;
+				res.result = SD_ERROR;
+				res.state = FSM_BUSY;
+				idx = 0;
+				line = 0;
+				
+						// Query invalid?
+				if(sector > dev->last_sector) {
+						PTB->PCOR = MASK(DBG_3);
+						PTB->PSOR = MASK(DBG_7);
+						res.state = FSM_IDLE;
+						res.result = SD_PARERR;
+						return res;
+				}
+				next_state = ST_S2;
+				return res;
+			
+			case ST_S2:
+
+				return res;
+			
+			case ST_S3:
+				
+				return res;
+			
+			case ST_S4:
+				
+				return res;
+			
+			case ST_RET:
+				
+				return res;
+			
+			default:
+				
+				return res;
 		}
+		
+		
 
     // Convert sector number to bytes address (sector * SD_BLK_SIZE)
     if(__SD_Send_Cmd(CMD24, sector * SD_BLK_SIZE)==0) {
@@ -684,7 +719,9 @@ SDRESULTS SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 			if((SPI_RW(0xFF) & 0x1F) != 0x05) {
 				PTB->PCOR = MASK(DBG_3);
 				PTB->PSOR = MASK(DBG_7);
-				return(SD_REJECT);
+				res.result = SD_REJECT;
+				res.state = FSM_IDLE;
+				return res;
 			}
 			
 			// Waits until finish of data programming with a timeout
@@ -698,19 +735,25 @@ SDRESULTS SD_Write_FSM(SD_DEV *dev, void *dat, DWORD sector)
 			{
 				PTB->PCOR = MASK(DBG_3);
 				PTB->PSOR = MASK(DBG_7);
-				return(SD_BUSY);
+				res.result = SD_BUSY;
+				res.state = FSM_IDLE;
+				return(res);
 			}
 			else
 			{
 				PTB->PCOR = MASK(DBG_3);
 				PTB->PSOR = MASK(DBG_7);
-				return(SD_OK);
+				res.result = SD_OK;
+				res.state = FSM_IDLE;
+				return(res);
 			}
 		}
     else {
 			PTB->PCOR = MASK(DBG_3);
 			PTB->PSOR = MASK(DBG_7);
-			return(SD_ERROR);
+			res.result = SD_ERROR;
+			res.state = FSM_IDLE;
+			return(res);
 		}
 }
 

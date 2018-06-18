@@ -16,11 +16,11 @@ I (D:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include\cmsis_compiler.h)(0x5899005A)
 I (D:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include\cmsis_armcc.h)(0x5899005A)
 I (.\RTE\Device\MKL25Z128xxx4\system_MKL25Z4.h)(0x5B22FAEF)
 I (Source\spi_io.h)(0x5B22FAF0)
-I (Source\sd_io.h)(0x5B26DBB2)
+I (Source\sd_io.h)(0x5B270938)
 I (Source\LEDs.h)(0x5B22FAEF)
 I (Source\debug.h)(0x5B22FAEF)
-F (.\Source\sd_io.c)(0x5B26E8A9)(--c99 -c --cpu Cortex-M0+ -D__EVAL -g -O0 --apcs=interwork --split_sections -I Source-I.\RTE\Device\MKL25Z128xxx4-I.\RTE\_Target_1-ID:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-ID:\MDK\ARM\PACK\Keil\Kinetis_KLxx_DFP\1.14.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DMKL25Z128xxx4-o .\objects\sd_io.o --omf_browse .\objects\sd_io.crf --depend .\objects\sd_io.d)
-I (Source\sd_io.h)(0x5B26DBB2)
+F (.\Source\sd_io.c)(0x5B270E3E)(--c99 -c --cpu Cortex-M0+ -D__EVAL -g -O0 --apcs=interwork --split_sections -I Source-I.\RTE\Device\MKL25Z128xxx4-I.\RTE\_Target_1-ID:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-ID:\MDK\ARM\PACK\Keil\Kinetis_KLxx_DFP\1.14.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DMKL25Z128xxx4-o .\objects\sd_io.o --omf_browse .\objects\sd_io.crf --depend .\objects\sd_io.d)
+I (Source\sd_io.h)(0x5B270938)
 I (Source\spi_io.h)(0x5B22FAF0)
 I (Source\integer.h)(0x5B22FAEF)
 I (D:\MDK\ARM\ARMCC\include\stdint.h)(0x588C3A14)

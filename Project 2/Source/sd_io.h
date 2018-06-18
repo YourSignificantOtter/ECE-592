@@ -92,8 +92,7 @@ typedef struct _SD_DEV {
     \return If all goes well returns SD_OK.
  */
 SDRESULTS SD_Init (SD_DEV *dev);
-
-SDRESULTS SD_Init_FSM (SD_DEV *dev);
+FSM_SD_RETURN_TYPE SD_Init_FSM (SD_DEV *dev);
 
 /**
     \brief Read a single block.
@@ -113,7 +112,7 @@ FSM_SD_RETURN_TYPE SD_Read_FSM (SD_DEV *dev, void *dat, DWORD sector, WORD ofs, 
     \return If all goes well returns SD_OK.
  */
 SDRESULTS SD_Write (SD_DEV *dev, void *dat, DWORD sector);
-SDRESULTS SD_Write_FSM (SD_DEV *dev, void *dat, DWORD sector);
+FSM_SD_RETURN_TYPE SD_Write_FSM (SD_DEV *dev, void *dat, DWORD sector);
 
 /**
     \brief Allows know status of SD card.
