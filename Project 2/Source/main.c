@@ -37,9 +37,11 @@ void test_write(void) {
 	buffer[510] = 0xCA;
 	buffer[511] = 0xFE;
 
-  if(SD_Init(dev)==SD_OK) {
+	do{
+		fsm_res = SD_Init_FSM(dev);
+	}while(fsm_res.state == FSM_BUSY);
+  if(fsm_res.result==SD_OK) {
 		// Change the data in this sector
-		//res = SD_Write(dev, (void*)buffer, sector_num);
 		do {
 			fsm_res = SD_Write_FSM(dev, (void*)buffer, sector_num);
 	}while(fsm_res.state == FSM_BUSY);

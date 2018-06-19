@@ -3,11 +3,11 @@
 <title>Static Call Graph - [.\Objects\ulibSD.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\ulibSD.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Mon Jun 18 19:09:18 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Mon Jun 18 19:56:00 2018
 <BR><P>
-<H3>Maximum Stack Usage =        120 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        184 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-__rt_entry_main &rArr; main &rArr; test_write &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+__rt_entry_main &rArr; main &rArr; test_write &rArr; SD_Init_FSM &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 <P>
 <H3>
 Functions with no stack information
@@ -23,7 +23,7 @@ Mutually Recursive functions
  <LI><a href="#[8]">SVC_Handler</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[8]">SVC_Handler</a><BR>
  <LI><a href="#[9]">PendSV_Handler</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[9]">PendSV_Handler</a><BR>
  <LI><a href="#[a]">SysTick_Handler</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[a]">SysTick_Handler</a><BR>
- <LI><a href="#[4a]">__SD_Send_Cmd</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[4a]">__SD_Send_Cmd</a><BR>
+ <LI><a href="#[4b]">__SD_Send_Cmd</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[4b]">__SD_Send_Cmd</a><BR>
 </UL>
 <P>
 <H3>
@@ -185,8 +185,8 @@ Global Symbols
 <P><STRONG><a name="[78]"></a>__rt_entry_postsh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000009))
 
 <P><STRONG><a name="[37]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 120 + Unknown Stack Size
-<LI>Call Chain = __rt_entry_main &rArr; main &rArr; test_write &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 184 + Unknown Stack Size
+<LI>Call Chain = __rt_entry_main &rArr; main &rArr; test_write &rArr; SD_Init_FSM &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[39]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit
 <LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -408,43 +408,44 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[44]"></a>SPI_CS_High</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, spi_io.o(i.SPI_CS_High))
-<BR><BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<P><STRONG><a name="[45]"></a>SPI_CS_High</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, spi_io.o(i.SPI_CS_High))
+<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
 <P><STRONG><a name="[52]"></a>SPI_CS_Low</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, spi_io.o(i.SPI_CS_Low))
-<BR><BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
 </UL>
 
-<P><STRONG><a name="[42]"></a>SD_Init</STRONG> (Thumb, 456 bytes, Stack size 32 bytes, sd_io.o(i.SD_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<P><STRONG><a name="[42]"></a>SD_Init_FSM</STRONG> (Thumb, 1450 bytes, Stack size 96 bytes, sd_io.o(i.SD_Init_FSM))
+<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = SD_Init_FSM &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
-<LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
-<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Init
-<LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Freq_Low
-<LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_CS_High
-<LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Speed_Transfer
-<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
-<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
-<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
-<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
+<BR>[Calls]<UL><LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
+<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
+<LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Init
+<LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Freq_Low
+<LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_CS_High
+<LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Speed_Transfer
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
+<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
+<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
+<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
+<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
 </UL>
 <BR>[Called By]<UL><LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_write
 </UL>
 
-<P><STRONG><a name="[4e]"></a>SD_Read_FSM</STRONG> (Thumb, 560 bytes, Stack size 72 bytes, sd_io.o(i.SD_Read_FSM))
+<P><STRONG><a name="[4f]"></a>SD_Read_FSM</STRONG> (Thumb, 560 bytes, Stack size 72 bytes, sd_io.o(i.SD_Read_FSM))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = SD_Read_FSM &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
-<LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
-<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
-<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
-<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
-<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
+<BR>[Calls]<UL><LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
+<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
+<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
+<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
+<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
 </UL>
 <BR>[Called By]<UL><LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_write
 </UL>
@@ -452,127 +453,128 @@ Global Symbols
 <P><STRONG><a name="[50]"></a>SD_Write_FSM</STRONG> (Thumb, 640 bytes, Stack size 64 bytes, sd_io.o(i.SD_Write_FSM))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = SD_Write_FSM &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
-<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
-<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
-<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
-<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
+<BR>[Calls]<UL><LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
+<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
+<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
+<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
 </UL>
 <BR>[Called By]<UL><LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_write
 </UL>
 
 <P><STRONG><a name="[53]"></a>SPI_Freq_High</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Freq_High))
-<BR><BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Speed_Transfer
+<BR><BR>[Called By]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Speed_Transfer
 </UL>
 
-<P><STRONG><a name="[45]"></a>SPI_Freq_Low</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Freq_Low))
-<BR><BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Speed_Transfer
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<P><STRONG><a name="[46]"></a>SPI_Freq_Low</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Freq_Low))
+<BR><BR>[Called By]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Speed_Transfer
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
-<P><STRONG><a name="[43]"></a>SPI_Init</STRONG> (Thumb, 76 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Init))
-<BR><BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<P><STRONG><a name="[44]"></a>SPI_Init</STRONG> (Thumb, 76 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Init))
+<BR><BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
-<P><STRONG><a name="[46]"></a>SPI_RW</STRONG> (Thumb, 52 bytes, Stack size 0 bytes, spi_io.o(i.SPI_RW))
-<BR><BR>[Called By]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
-<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
+<P><STRONG><a name="[47]"></a>SPI_RW</STRONG> (Thumb, 52 bytes, Stack size 0 bytes, spi_io.o(i.SPI_RW))
+<BR><BR>[Called By]<UL><LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
-<P><STRONG><a name="[4d]"></a>SPI_Release</STRONG> (Thumb, 28 bytes, Stack size 4 bytes, spi_io.o(i.SPI_Release))
+<P><STRONG><a name="[4e]"></a>SPI_Release</STRONG> (Thumb, 28 bytes, Stack size 4 bytes, spi_io.o(i.SPI_Release))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = SPI_Release
 </UL>
-<BR>[Calls]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
+<BR>[Calls]<UL><LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
 </UL>
-<BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
-<P><STRONG><a name="[49]"></a>SPI_Timer_Off</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Timer_Off))
-<BR><BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<P><STRONG><a name="[4a]"></a>SPI_Timer_Off</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Timer_Off))
+<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 <LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_write
 </UL>
 
-<P><STRONG><a name="[47]"></a>SPI_Timer_On</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Timer_On))
-<BR><BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<P><STRONG><a name="[48]"></a>SPI_Timer_On</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Timer_On))
+<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 <LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_write
 </UL>
 
-<P><STRONG><a name="[48]"></a>SPI_Timer_Status</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Timer_Status))
-<BR><BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<P><STRONG><a name="[49]"></a>SPI_Timer_Status</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, spi_io.o(i.SPI_Timer_Status))
+<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 <LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_write
 </UL>
 
 <P><STRONG><a name="[2b]"></a>SystemInit</STRONG> (Thumb, 266 bytes, Stack size 0 bytes, system_mkl25z4.o(i.SystemInit))
 <BR>[Address Reference Count : 1]<UL><LI> startup_mkl25z4.o(.text)
 </UL>
-<P><STRONG><a name="[4f]"></a>__ARM_common_switch8</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, sd_io.o(i.__ARM_common_switch8))
+<P><STRONG><a name="[43]"></a>__ARM_common_switch8</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, sd_io.o(i.__ARM_common_switch8))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __ARM_common_switch8
 </UL>
 <BR>[Called By]<UL><LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
 <P><STRONG><a name="[51]"></a>__SD_Power_Of_Two</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, sd_io.o(i.__SD_Power_Of_Two))
-<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
+<BR><BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
 </UL>
 
-<P><STRONG><a name="[4b]"></a>__SD_Sectors</STRONG> (Thumb, 230 bytes, Stack size 48 bytes, sd_io.o(i.__SD_Sectors))
+<P><STRONG><a name="[4c]"></a>__SD_Sectors</STRONG> (Thumb, 230 bytes, Stack size 48 bytes, sd_io.o(i.__SD_Sectors))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
-<LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
-<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<BR>[Calls]<UL><LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
+<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
 <LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Power_Of_Two
 </UL>
-<BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
-<P><STRONG><a name="[4a]"></a>__SD_Send_Cmd</STRONG> (Thumb, 158 bytes, Stack size 24 bytes, sd_io.o(i.__SD_Send_Cmd))
+<P><STRONG><a name="[4b]"></a>__SD_Send_Cmd</STRONG> (Thumb, 158 bytes, Stack size 24 bytes, sd_io.o(i.__SD_Send_Cmd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24 + In Cycle
 <LI>Call Chain = __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
+<BR>[Calls]<UL><LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
 <LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_CS_Low
-<LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_CS_High
-<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
-<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
-<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
+<LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_CS_High
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
+<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
+<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
 </UL>
-<BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
-<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
+<BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Send_Cmd
+<LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__SD_Sectors
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
-<P><STRONG><a name="[4c]"></a>__SD_Speed_Transfer</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, sd_io.o(i.__SD_Speed_Transfer))
+<P><STRONG><a name="[4d]"></a>__SD_Speed_Transfer</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, sd_io.o(i.__SD_Speed_Transfer))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __SD_Speed_Transfer
 </UL>
-<BR>[Calls]<UL><LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Freq_Low
+<BR>[Calls]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Freq_Low
 <LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Freq_High
 </UL>
-<BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 </UL>
 
 <P><STRONG><a name="[38]"></a>main</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = main &rArr; test_write &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = main &rArr; test_write &rArr; SD_Init_FSM &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Init_RGB_LEDs
 <LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Control_RGB_LEDs
@@ -582,15 +584,15 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[37]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
 </UL>
 
-<P><STRONG><a name="[57]"></a>test_write</STRONG> (Thumb, 348 bytes, Stack size 16 bytes, main.o(i.test_write))
-<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = test_write &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<P><STRONG><a name="[57]"></a>test_write</STRONG> (Thumb, 364 bytes, Stack size 16 bytes, main.o(i.test_write))
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = test_write &rArr; SD_Init_FSM &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
-<LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
-<LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
+<BR>[Calls]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status
+<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_On
+<LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Off
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write_FSM
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Read_FSM
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init_FSM
 <LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Control_RGB_LEDs
 </UL>
 <BR>[Called By]<UL><LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
