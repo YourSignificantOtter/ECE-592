@@ -35,14 +35,6 @@ void SD_Manager_thread(void * argument) {
 	// On first run, init card and write test data to given block (sector_num) in flash. 
 	// Then repeatedly read the sector and confirm its contents
 	
-	//Determine the 1 second 100% idle time
-	volatile uint32_t before, after, diff;
-	before = idle_counter;
-	PTB->PSOR = MASK(DBG_6);
-	osDelay(4000);
-	PTB->PCOR = MASK(DBG_6);
-	after = idle_counter;
-	diff = after - before;
 	
 	
 	int i;
