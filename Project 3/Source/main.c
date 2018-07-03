@@ -4,11 +4,15 @@
 #include "sd_io.h"
 #include "LEDs.h"
 #include "debug.h"
+#include "cmsis_os2.h"
 
+/*
 SD_DEV dev[1];          // Create device descriptor
 uint8_t buffer[512];    // Example of your buffer data
 volatile uint32_t sum = 0;
+*/
 
+/*
 void SD_Manager(void) {
 	// On first run, init card and write test data to given block (sector_num) in flash. 
 	// Then repeatedly read the sector and confirm its contents
@@ -68,7 +72,9 @@ void SD_Manager(void) {
 		}
 	}
 }
+*/
 
+/*
 int main(void)
 {
 	Init_Debug_Signals();
@@ -81,3 +87,4 @@ int main(void)
 	while (1)
 		;
 }
+*/

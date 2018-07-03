@@ -608,11 +608,13 @@ ARM Macro Assembler    Page 10
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M0+ --apcs=inter
 work --depend=.\objects\startup_mkl25z4.d -o.\objects\startup_mkl25z4.o -I.\RTE
-\Device\MKL25Z128xxx4 -I.\RTE\_Target_1 -ID:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS
-\Include -ID:\MDK\ARM\PACK\Keil\Kinetis_KLxx_DFP\1.14.0\Device\Include --predef
-ine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 524" --predefine="_RTE_
- SETA 1" --predefine="MKL25Z128xxx4 SETA 1" --list=.\listings\startup_mkl25z4.l
-st RTE\Device\MKL25Z128xxx4\startup_MKL25Z4.s
+\CMSIS -I.\RTE\Device\MKL25Z128xxx4 -I.\RTE\_Target_1 -ID:\MDK\ARM\PACK\ARM\CMS
+IS\5.0.1\CMSIS\Include -ID:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\RTOS2\Include -I
+D:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\RTOS2\RTX\Include -ID:\MDK\ARM\PACK\Keil\
+Kinetis_KLxx_DFP\1.14.0\Device\Include --predefine="__EVAL SETA 1" --predefine=
+"__UVISION_VERSION SETA 524" --predefine="_RTE_ SETA 1" --predefine="MKL25Z128x
+xx4 SETA 1" --list=.\listings\startup_mkl25z4.lst RTE\Device\MKL25Z128xxx4\star
+tup_MKL25Z4.s
 
 
 
