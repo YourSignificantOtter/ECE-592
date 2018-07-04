@@ -22,15 +22,19 @@ Dialog DLL:      TARMCM1.DLL V1.13.0.0
  
 <h2>Project:</h2>
 D:\NCSU\ECE 592\ECE-592\Project 3\ulibSD.uvprojx
-Project File Date:  07/02/2018
+Project File Date:  07/04/2018
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\MDK\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling cmsis_main.c...
+compiling sd_io.c...
+Source\sd_io.c(344): warning:  #1441-D: nonstandard cast on lvalue
+                 ((BYTE *) dat)++;
+Source\sd_io.c: 1 warning, 0 errors
 linking...
-Program Size: Code=11596 RO-data=444 RW-data=5520 ZI-data=1648  
-".\Objects\ulibSD.axf" - 0 Error(s), 0 Warning(s).
+Program Size: Code=13080 RO-data=572 RW-data=5520 ZI-data=1648  
+".\Objects\ulibSD.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -61,34 +65,34 @@ Package Vendor: Keil
 
    * Component: Keil::Device:Startup:2.5.0
       Source file:   Device\Source\ARM\startup_MKL25Z4.s
-      Include file:  Device\Source\system_MKL25Z4.h
       Source file:   Device\Source\system_MKL25Z4.c
+      Include file:  Device\Source\system_MKL25Z4.h
 
    * Component: ARM::CMSIS:RTOS2:Keil RTX5:Source:5.1.0
-      Source file:   CMSIS\RTOS2\RTX\Template\Timer.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_timer.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_evflags.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_mutex.c
       Source file:   CMSIS\RTOS2\RTX\Template\MsgQueue.c
-      Source file:   CMSIS\RTOS2\RTX\Template\main.c
-      Source file:   CMSIS\RTOS2\RTX\Template\Thread.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_delay.c
-      Include file:  CMSIS\RTOS2\RTX\Config\RTX_Config.h
-      Source file:   CMSIS\RTOS2\RTX\Template\Events.c
-      Source file:   CMSIS\RTOS2\RTX\Template\Semaphore.c
-      Source file:   CMSIS\RTOS2\RTX\Config\RTX_Config.c
       Source file:   CMSIS\RTOS2\RTX\Template\Mutex.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_kernel.c
-      Source file:   CMSIS\RTOS2\RTX\Template\MemPool.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Semaphore.c
       Include file:  CMSIS\RTOS2\RTX\Include\rtx_os.h
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_thread.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_msgqueue.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_evr.c
+      Include file:  CMSIS\RTOS2\RTX\Config\RTX_Config.h
+      Source file:   CMSIS\RTOS2\RTX\Config\RTX_Config.c
+      Source file:   CMSIS\RTOS2\RTX\Template\main.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Events.c
+      Source file:   CMSIS\RTOS2\RTX\Template\MemPool.c
       Source file:   CMSIS\RTOS2\RTX\Source\rtx_lib.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_memory.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_kernel.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_delay.c
       Source file:   CMSIS\RTOS2\RTX\Source\rtx_semaphore.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_system.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_thread.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_mutex.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_memory.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Timer.c
       Source file:   CMSIS\RTOS2\RTX\Source\ARM\irq_cm0.s
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_evr.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Thread.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_evflags.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_timer.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_system.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_msgqueue.c
       Source file:   CMSIS\RTOS2\RTX\Source\rtx_mempool.c
 
    * Component: ARM::CMSIS:CORE:5.0.1

@@ -16,6 +16,9 @@
 #include <MKL25Z4.h>
 #include "debug.h"
 
+
+extern volatile uint32_t idle_counter;
+
 /******************************************************************************
  Private Methods Prototypes - Direct work with SD card
 ******************************************************************************/
@@ -198,6 +201,9 @@ SDRESULTS SD_Init(SD_DEV *dev)
     BYTE n, cmd, ct, ocr[4];
     BYTE idx;
     BYTE init_trys;
+		volatile uint32_t before, after, diff; // idle time counts
+	
+		before = idle_counter;
 	
     ct = 0;
     for(init_trys=0; ((init_trys!=SD_INIT_TRYS)&&(!ct)); init_trys++)
@@ -212,13 +218,20 @@ SDRESULTS SD_Init(SD_DEV *dev)
         for(idx = 0; idx != 10; idx++) 
 					SPI_RW(0xFF);
 
+				/* Replaced with the osDelay() call
         SPI_Timer_On(500);
         while(SPI_Timer_Status()==TRUE) {
 					PTB->PTOR = MASK(DBG_SD_INIT);
 				}
 				PTB->PSOR = MASK(DBG_SD_INIT);
         SPI_Timer_Off();
-
+				*/
+				
+				PTB->PCOR = MASK(DBG_SD_INIT);
+				uint32_t tick_freq = osKernelGetTickFreq();
+				osDelay(0.5/(1.0/tick_freq));
+				PTB->PSOR = MASK(DBG_SD_INIT);
+				
         dev->mount = FALSE;
         SPI_Timer_On(500);
         while ((__SD_Send_Cmd(CMD0, 0) != 1)&&(SPI_Timer_Status()==TRUE)) {
@@ -291,6 +304,10 @@ SDRESULTS SD_Init(SD_DEV *dev)
     }
     SPI_Release();
 		PTB->PCOR = MASK(DBG_SD_INIT);
+		
+		after = idle_counter;
+		diff = after - before;
+		
     return (ct ? SD_OK : SD_NOINIT);
 }
 

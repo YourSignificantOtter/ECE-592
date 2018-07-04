@@ -8,7 +8,7 @@
 .\objects\main.o: .\RTE\Device\MKL25Z128xxx4\system_MKL25Z4.h
 .\objects\main.o: Source\spi_io.h
 .\objects\main.o: Source\sd_io.h
-.\objects\main.o: Source\LEDs.h
-.\objects\main.o: Source\debug.h
 .\objects\main.o: D:\MDK\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\RTOS2\Include\cmsis_os2.h
 .\objects\main.o: D:\MDK\ARM\ARMCC\Bin\..\include\stddef.h
+.\objects\main.o: Source\LEDs.h
+.\objects\main.o: Source\debug.h

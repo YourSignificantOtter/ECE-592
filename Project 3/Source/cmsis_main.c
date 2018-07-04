@@ -36,7 +36,6 @@ void SD_Manager_thread(void * argument) {
 	// Then repeatedly read the sector and confirm its contents
 	
 	
-	
 	int i;
 	DWORD sector_num = 0x23; // Manual wear leveling
   SDRESULTS res;

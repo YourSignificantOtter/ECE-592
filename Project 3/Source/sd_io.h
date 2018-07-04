@@ -22,6 +22,7 @@
 /*****************************************************************************/
 
 #include "spi_io.h" /* Provide the low-level functions */
+#include "cmsis_os2.h" 
 
 /* Definitions of SD commands */
 #define CMD0    (0x40+0)        /* GO_IDLE_STATE            */
