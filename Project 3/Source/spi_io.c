@@ -83,7 +83,8 @@ BYTE SPI_RW (BYTE d) {
 		if(Wait_Type_Flag == isr)
 		{
 			unsigned char data;
-			osMessageQueueGet(SPI_Message_Queue, &data, NULL, NULL);
+			osMessageQueueGet(SPI_Message_Queue, &data, NULL, osWaitForever);
+			PTB->PCOR = MASK(DBG_SPI_RW);
 			return data;
 		}
 		else

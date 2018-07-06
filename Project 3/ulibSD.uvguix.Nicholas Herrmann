@@ -3532,9 +3532,9 @@
       </Doc>
       <Doc>
         <Name>.\Source\spi_io.c</Name>
-        <ColumnNumber>35</ColumnNumber>
+        <ColumnNumber>4</ColumnNumber>
         <TopLine>71</TopLine>
-        <CurrentLine>91</CurrentLine>
+        <CurrentLine>81</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3551,7 +3551,7 @@
       <Doc>
         <Name>.\Source\sd_io.c</Name>
         <ColumnNumber>0</ColumnNumber>
-        <TopLine>135</TopLine>
+        <TopLine>205</TopLine>
         <CurrentLine>138</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
