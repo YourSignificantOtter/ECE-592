@@ -3,9 +3,9 @@
 <title>Static Call Graph - [.\Objects\ulibSD.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\ulibSD.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Jul 06 00:35:56 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Jul 06 01:25:48 2018
 <BR><P>
-<H3>Maximum Stack Usage =        272 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        280 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 SD_Manager_thread &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 <P>
@@ -771,7 +771,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[6a]"></a>SD_Init</STRONG> (Thumb, 572 bytes, Stack size 80 bytes, sd_io.o(i.SD_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 264<LI>Call Chain = SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetTickFreq
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -794,7 +794,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[2e]"></a>SD_Manager_thread</STRONG> (Thumb, 244 bytes, Stack size 8 bytes, cmsis_main.o(i.SD_Manager_thread))
-<BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = SD_Manager_thread &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = SD_Manager_thread &rArr; SD_Init &rArr; __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Control_RGB_LEDs
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Write
@@ -804,7 +804,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> cmsis_main.o(i.main)
 </UL>
 <P><STRONG><a name="[7c]"></a>SD_Read</STRONG> (Thumb, 200 bytes, Stack size 56 bytes, sd_io.o(i.SD_Read))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = SD_Read &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = SD_Read &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
@@ -815,7 +815,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[7b]"></a>SD_Write</STRONG> (Thumb, 204 bytes, Stack size 48 bytes, sd_io.o(i.SD_Write))
-<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = SD_Write &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = SD_Write &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
@@ -824,7 +824,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[2e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Manager_thread
 </UL>
 
-<P><STRONG><a name="[16]"></a>SPI1_IRQHandler</STRONG> (Thumb, 48 bytes, Stack size 16 bytes, spi_io.o(i.SPI1_IRQHandler))
+<P><STRONG><a name="[16]"></a>SPI1_IRQHandler</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, spi_io.o(i.SPI1_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = SPI1_IRQHandler &rArr; osMessageQueuePut &rArr; isrRtxMessageQueuePut &rArr; __aeabi_memcpy
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessageQueuePut
@@ -857,8 +857,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
 </UL>
 
-<P><STRONG><a name="[6e]"></a>SPI_RW</STRONG> (Thumb, 98 bytes, Stack size 8 bytes, spi_io.o(i.SPI_RW))
-<BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = SPI_RW &rArr; osMessageQueueGet &rArr; isrRtxMessageQueueGet &rArr; MessageQueueGet
+<P><STRONG><a name="[6e]"></a>SPI_RW</STRONG> (Thumb, 100 bytes, Stack size 16 bytes, spi_io.o(i.SPI_RW))
+<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = SPI_RW &rArr; osMessageQueueGet &rArr; isrRtxMessageQueueGet &rArr; MessageQueueGet
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessageQueueGet
 </UL>
@@ -871,7 +871,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[79]"></a>SPI_Release</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, spi_io.o(i.SPI_Release))
-<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = SPI_Release &rArr; SPI_RW &rArr; osMessageQueueGet &rArr; isrRtxMessageQueueGet &rArr; MessageQueueGet
+<BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = SPI_Release &rArr; SPI_RW &rArr; osMessageQueueGet &rArr; isrRtxMessageQueueGet &rArr; MessageQueueGet
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
 </UL>
@@ -924,7 +924,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[77]"></a>__SD_Sectors</STRONG> (Thumb, 230 bytes, Stack size 48 bytes, sd_io.o(i.__SD_Sectors))
-<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = __SD_Sectors &rArr; __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Release
 <LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_RW
@@ -935,7 +935,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[74]"></a>__SD_Send_Cmd</STRONG> (Thumb, 190 bytes, Stack size 24 bytes, sd_io.o(i.__SD_Send_Cmd))
-<BR><BR>[Stack]<UL><LI>Max Depth = 136 + In Cycle
+<BR><BR>[Stack]<UL><LI>Max Depth = 144 + In Cycle
 <LI>Call Chain = __SD_Send_Cmd &rArr;  __SD_Send_Cmd (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Timer_Status

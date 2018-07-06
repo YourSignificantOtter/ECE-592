@@ -18,6 +18,7 @@
 
 
 extern volatile uint32_t idle_counter;
+extern volatile osMessageQueueId_t SPI_Message_Queue;
 
 /******************************************************************************
  Private Methods Prototypes - Direct work with SD card

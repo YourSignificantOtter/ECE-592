@@ -82,9 +82,9 @@ BYTE SPI_RW (BYTE d) {
 		SPI1_D = d;
 		if(Wait_Type_Flag == isr)
 		{
-			unsigned char * data;
-			osMessageQueueGet(SPI_Message_Queue, data, NULL, NULL);
-			return *data;
+			unsigned char data;
+			osMessageQueueGet(SPI_Message_Queue, &data, NULL, NULL);
+			return data;
 		}
 		else
 		{
@@ -122,17 +122,14 @@ inline void SPI_Freq_Low (void) {
 
 void SPI1_IRQHandler(void)
 {
-	unsigned char clear = SPI1_S;// Clear interrupt flag
-	__disable_irq();
 	PTB->PSOR = MASK(DBG_ISR);
 	
-	
+	unsigned char clear = SPI1_S;// Clear interrupt flag
 	unsigned char data = SPI1_D; // Read the data in the SPI1 Buffer
 	osMessageQueuePut(SPI_Message_Queue, &data, NULL, NULL); //Put the data into the queue
 	
 	
 	PTB->PCOR = MASK(DBG_ISR);
-	__enable_irq();
 }
 
 void SPI_Timer_On (WORD ms) {
