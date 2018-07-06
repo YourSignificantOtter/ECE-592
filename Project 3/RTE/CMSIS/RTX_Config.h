@@ -44,7 +44,7 @@
 //   <i> Defines base time unit for delays and timeouts.
 //   <i> Default: 1000 (1ms tick)
 #ifndef OS_TICK_FREQ
-#define OS_TICK_FREQ                4000
+#define OS_TICK_FREQ                20000
 #endif
  
 //   <e>Round-Robin Thread switching

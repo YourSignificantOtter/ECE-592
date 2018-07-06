@@ -21,6 +21,7 @@ SD_DEV dev[1];          // Create device descriptor
 uint8_t buffer[512];    // Example of your buffer data
 volatile uint32_t sum = 0;
 extern volatile uint32_t idle_counter;
+volatile osMessageQueueId_t SPI_Message_Queue;
  
 /*----------------------------------------------------------------------------
  * Application main thread
@@ -33,8 +34,17 @@ void app_main (void *argument) {
 
 void SD_Manager_thread(void * argument) {
 	// On first run, init card and write test data to given block (sector_num) in flash. 
-	// Then repeatedly read the sector and confirm its contents
-	
+	// Then repeatedly read the sector and confirm its contents	
+
+	/*
+	//1 second of idle time, read the idle_counter
+	volatile uint32_t before, after, diff, sysTick; // idle time counts
+	before = idle_counter;
+	sysTick = osKernelGetTickFreq();
+	osDelay(1.0/(1.0/sysTick));
+	after = idle_counter;
+	diff = after - before;
+	*/
 	
 	int i;
 	DWORD sector_num = 0x23; // Manual wear leveling
@@ -104,13 +114,8 @@ int main (void) {
  
 	Init_Debug_Signals();
 	Init_RGB_LEDs();
+	SPI_Message_Queue = osMessageQueueNew(8, sizeof(unsigned char), NULL);
 	Control_RGB_LEDs(1,1,0);	// Yellow - starting up
-	
- 	// Test function to write a block and then read back, verify
-	//SD_Manager();
-  
-	//while (1)
-	//	;
 	
   osKernelInitialize();                 // Initialize CMSIS-RTOS
   //osThreadNew(app_main, NULL, NULL);    // Create application main thread

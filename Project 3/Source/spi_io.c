@@ -11,6 +11,10 @@
 #include "spi_io.h"
 #include <MKL25Z4.h>
 #include "debug.h"
+#include "cmsis_os2.h"
+
+volatile enum Wait_Type{isr, busy} Wait_Type_Flag;
+extern volatile osMessageQueueId_t SPI_Message_Queue;
 
 /******************************************************************************
  Module Public Functions - Low level SPI control functions
@@ -64,6 +68,10 @@ void SPI_Init (void) {
      * Bit 3:0          = 0 Reserved
      */
     SPI1_S = 0x00;
+		
+		NVIC_SetPriority(SPI1_IRQn, 2);
+		NVIC_ClearPendingIRQ(SPI1_IRQn);
+		NVIC_EnableIRQ(SPI1_IRQn); //Enable SPI1 IRQ
 }
 
 BYTE SPI_RW (BYTE d) {
@@ -72,10 +80,19 @@ BYTE SPI_RW (BYTE d) {
 			PTB->PTOR = MASK(DBG_SPI_RW);
     PTB->PSOR = MASK(DBG_SPI_RW);
 		SPI1_D = d;
-    while(!(SPI1_S & SPI_S_SPRF_MASK))
-			PTB->PTOR = MASK(DBG_SPI_RW); 
-		PTB->PCOR = MASK(DBG_SPI_RW);
-    return((BYTE)(SPI1_D));
+		if(Wait_Type_Flag == isr)
+		{
+			unsigned char * data;
+			osMessageQueueGet(SPI_Message_Queue, data, NULL, NULL);
+			return *data;
+		}
+		else
+		{
+			while(!(SPI1_S & SPI_S_SPRF_MASK))
+				PTB->PTOR = MASK(DBG_SPI_RW);
+			PTB->PCOR = MASK(DBG_SPI_RW);
+			return((BYTE)(SPI1_D));
+		}
 }
 
 void SPI_Release (void) {
@@ -92,11 +109,30 @@ inline void SPI_CS_High (void){
 }
 
 inline void SPI_Freq_High (void) {
-		SPI1_BR = 0x01; 
+		SPI1_BR = 0x01;
+		Wait_Type_Flag = busy;
+		SPI1_C1 &= ~SPI_C1_SPIE_MASK; //Disable recieve interrupts
 }	
 
 inline void SPI_Freq_Low (void) {
     SPI1_BR = 0x44; // 48MHz / 160 = 300kHz
+		Wait_Type_Flag = isr;
+		SPI1_C1 |= SPI_C1_SPIE_MASK; //Enable receive interrupts
+}
+
+void SPI1_IRQHandler(void)
+{
+	unsigned char clear = SPI1_S;// Clear interrupt flag
+	__disable_irq();
+	PTB->PSOR = MASK(DBG_ISR);
+	
+	
+	unsigned char data = SPI1_D; // Read the data in the SPI1 Buffer
+	osMessageQueuePut(SPI_Message_Queue, &data, NULL, NULL); //Put the data into the queue
+	
+	
+	PTB->PCOR = MASK(DBG_ISR);
+	__enable_irq();
 }
 
 void SPI_Timer_On (WORD ms) {

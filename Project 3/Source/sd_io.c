@@ -127,7 +127,7 @@ BYTE __SD_Send_Cmd(BYTE cmd, DWORD arg)
     // Wait for a valid response in timeout of 5 milliseconds
     SPI_Timer_On(5);
     do {
-			PTB->PTOR = MASK(DBG_SD_SEND_CMD);
+				PTB->PTOR = MASK(DBG_SD_SEND_CMD);
         res = SPI_RW(0xFF);
     } while((res & 0x80)&&(SPI_Timer_Status()==TRUE));
     PTB->PCOR = MASK(DBG_SD_SEND_CMD);
@@ -317,6 +317,9 @@ SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
     SDRESULTS res;
     BYTE tkn, data;
     WORD byte_num;
+		volatile uint32_t before, after, diff; // idle time counts
+	
+		before = idle_counter;
 		
     res = SD_ERROR;
     if ((sector > dev->last_sector)||(cnt == 0))
@@ -326,13 +329,29 @@ SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
 		}
     // Convert sector number to byte address (sector * SD_BLK_SIZE)
     if (__SD_Send_Cmd(CMD17, sector * SD_BLK_SIZE) == 0) {
-        SPI_Timer_On(100);  // Wait for data packet (timeout of 100ms)
+				
+				tkn = 0xFF;
+				while(tkn == 0xFF)
+				{
+					tkn = SPI_RW(0xFF);
+					if(tkn != 0xFF)
+						break;
+					
+					PTB->PTOR = MASK(DBG_SD_READ);
+					osDelay(1);
+					PTB->PTOR = MASK(DBG_SD_READ);
+				}
+			
+				/*
+				SPI_Timer_On(100);  // Wait for data packet (timeout of 100ms)
         do {
             tkn = SPI_RW(0xFF);
 						PTB->PTOR = MASK(DBG_SD_READ);
         } while((tkn==0xFF)&&(SPI_Timer_Status()==TRUE));
 				PTB->PSOR = MASK(DBG_SD_READ);
         SPI_Timer_Off();
+				*/
+			
         // Token of single block?
         if(tkn==0xFE) { 
 					// AGD: Loop fusion to simplify FSM formation
@@ -350,6 +369,12 @@ SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
     SPI_Release();
     dev->debug.read++;
 		PTB->PCOR = MASK(DBG_SD_READ);
+		
+		after = idle_counter;
+		diff = after - before;
+		
+		SPI_RW(0xFF); // This is here so that I can actually read the value of Diff
+		
     return(res);
 }
 
@@ -358,6 +383,9 @@ SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 		PTB->PSOR = MASK(DBG_SD_WRITE);
     WORD idx;
     BYTE line;
+		volatile uint32_t before, after, diff; // idle time counts
+	
+		before = idle_counter;
 
 		// Query invalid?
     if(sector > dev->last_sector) {
@@ -381,6 +409,7 @@ SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 				return(SD_REJECT);
 			}
 			
+			/* replaced with osDelay
 			// Waits until finish of data programming with a timeout
 			SPI_Timer_On(SD_IO_WRITE_TIMEOUT_WAIT);
 			do {
@@ -389,8 +418,24 @@ SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 			} while((line==0)&&(SPI_Timer_Status()==TRUE));
 			PTB->PSOR = MASK(DBG_SD_WRITE);
 			SPI_Timer_Off();
+			*/
+			line = 0x00;
+			while(line == 0x00)
+			{
+				line = SPI_RW(0xFF);
+				if(line != 0x00)
+					break;
+				
+				PTB->PTOR = MASK(DBG_SD_WRITE);
+				osDelay(1);
+				PTB->PTOR = MASK(DBG_SD_WRITE);
+			}
+			
 			dev->debug.write++;
-
+			
+			after = idle_counter;
+			diff = after - before;
+			
 			PTB->PCOR = MASK(DBG_SD_WRITE);
 			if(line==0)
 				return(SD_BUSY);
