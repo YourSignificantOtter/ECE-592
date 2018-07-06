@@ -196,6 +196,21 @@ DWORD __SD_Sectors (SD_DEV *dev)
  Public Methods - Direct work with SD card
 ******************************************************************************/
 
+BOOL osTimerDelay(uint32_t ms)
+{
+	static uint32_t start = 0; // get initial tick count
+	if(start == 0)
+		start = osKernelGetTickCount(); //reset the start time
+	
+	if(osKernelGetTickCount() - start >= ms) //check the run time since first call
+	{
+		start = 0; //be able to reset time for next use
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
 SDRESULTS SD_Init(SD_DEV *dev)
 {
 		PTB->PSOR = MASK(DBG_SD_INIT);
@@ -234,8 +249,8 @@ SDRESULTS SD_Init(SD_DEV *dev)
 				PTB->PSOR = MASK(DBG_SD_INIT);
 				
         dev->mount = FALSE;
-        SPI_Timer_On(500);
-        while ((__SD_Send_Cmd(CMD0, 0) != 1)&&(SPI_Timer_Status()==TRUE)) {
+        //SPI_Timer_On(500);
+        while ((__SD_Send_Cmd(CMD0, 0) != 1)&&(osTimerDelay(500) == FALSE)){//(SPI_Timer_Status()==TRUE)) {
 					PTB->PTOR = MASK(DBG_SD_INIT);
 				}
 				PTB->PSOR = MASK(DBG_SD_INIT);
@@ -251,12 +266,12 @@ SDRESULTS SD_Init(SD_DEV *dev)
                 if ((ocr[2] == 0x01)&&(ocr[3] == 0xAA))
                 {
                     // Wait for leaving idle state (ACMD41 with HCS bit)...
-                    SPI_Timer_On(1000);
-                    while ((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(ACMD41, 1UL << 30))) {
+                    //SPI_Timer_On(1000);
+                    while ((osTimerDelay(1000) == FALSE)&&(__SD_Send_Cmd(ACMD41, 1UL << 30))) {//((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(ACMD41, 1UL << 30))) {
 											PTB->PTOR = MASK(DBG_SD_INIT);
 										}
 										PTB->PSOR = MASK(DBG_SD_INIT);
-                    SPI_Timer_Off(); 
+                    //SPI_Timer_Off(); 
                     // CCS in the OCR? 
 										// AGD: Delete SPI_Timer_Status call?
                     if ((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(CMD58, 0) == 0))
@@ -281,7 +296,7 @@ SDRESULTS SD_Init(SD_DEV *dev)
                 }
                 // Wait for leaving idle state
                 SPI_Timer_On(250);
-                while((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(cmd, 0))) {
+                while ((osTimerDelay(250) == FALSE)&&(__SD_Send_Cmd(cmd, 0))) {//((SPI_Timer_Status()==TRUE)&&(__SD_Send_Cmd(cmd, 0))) {
 									PTB->PTOR = MASK(DBG_SD_INIT);
 								}
 								PTB->PSOR = MASK(DBG_SD_INIT);
