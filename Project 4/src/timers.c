@@ -5,25 +5,14 @@
 #include "debug.h"
 
 void PIT_IRQHandler() {
-	static int counter=50;
-	
+	PTB->PSOR = MASK(DBG_IRQ_TPM);
 	if (PIT->CHANNEL[0].TFLG & PIT_TFLG_TIF_MASK) {
 		// clear status flag for timer channel 0
 		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;		
 		// Do ISR work here
-		
-		// Demo test code to directly drive LED open-loop 
-		// Delete it for Project 4 
-		counter--;
-		if (counter > 2) {
-			PWM_Set_Value(TPM0, PWM_HBLED_CHANNEL, 0);
-		} else if (counter > 0) {
-			PWM_Set_Value(TPM0, PWM_HBLED_CHANNEL, 110);
-		} else {
-			counter = 50;
-		}
-		// End of demo test code
-	} 
+		Control_HBLED();
+	}
+	PTB->PCOR = MASK(DBG_IRQ_TPM);
 }
 
 void PIT_Init(unsigned period) {

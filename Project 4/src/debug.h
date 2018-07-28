@@ -15,9 +15,9 @@
 #define DBG_7 11
 
 #define DBG_LED_ON 	DBG_1  
-#define DBG_CONTROLLER	DBG_2 
-#define DBG_IRQ_TPM	DBG_3 
-#define DBG_IRQ_ADC	DBG_4 
+#define DBG_CONTROLLER	DBG_4 
+#define DBG_IRQ_TPM	DBG_2 
+#define DBG_IRQ_ADC	DBG_3 
 //#define DBG_	DBG_4 
 //#define DBG_	DBG_5 
 //#define DBG_	DBG_6

@@ -60,6 +60,7 @@ float UpdatePID(SPid * pid, float error, float position){
 
 void Control_HBLED(void) {
 	uint16_t res;
+	PTB->PSOR = MASK(DBG_CONTROLLER);
 	
 	// Start conversion
 	ADC0->SC1[0] = ADC_SC1_AIEN(1) | ADC_SENSE_CHANNEL;
@@ -96,6 +97,7 @@ void Control_HBLED(void) {
 	else if (duty_cycle > LIM_DUTY_CYCLE)
 		duty_cycle = LIM_DUTY_CYCLE;
 	PWM_Set_Value(TPM0, PWM_HBLED_CHANNEL, duty_cycle);
+	PTB->PCOR = MASK(DBG_CONTROLLER);
 }
 
 void Set_DAC_mA(unsigned int current) {
@@ -159,19 +161,24 @@ int main (void) {
 	PWM_Init(TPM0, PWM_HBLED_CHANNEL, PWM_PERIOD, 0);
 	PWM_Set_Value(TPM0, PWM_HBLED_CHANNEL, 0);
 
-	PIT_Init(500000);
+	PIT_Init(4800); //4800 gets us 5KHz, 5000 gets us 4.8KHz
 	PIT_Start();
 
 	while (1) {
 		g_set_current = 0;
+		Set_DAC_mA(g_set_current);
 		Delay(300);
 		
+		PTB->PSOR = MASK(DBG_LED_ON);
 		for (g_set_current = 10; g_set_current < 50; g_set_current += 10) {
-			ShortDelay(3350);
+			Set_DAC_mA(g_set_current);
+			ShortDelay(3900);
 		}
 		for (g_set_current = 50; g_set_current >= 0; g_set_current -= 10) {
-			ShortDelay(3350);
+			Set_DAC_mA(g_set_current);
+			ShortDelay(3900);
 		}
+		PTB->PCOR = MASK(DBG_LED_ON);
 	}
 }
 
