@@ -62,10 +62,6 @@ void Control_HBLED(void) {
 	uint16_t res;
 	PTB->PSOR = MASK(DBG_CONTROLLER);
 	
-	// Start conversion
-	ADC0->SC1[0] = ADC_SC1_AIEN(1) | ADC_SENSE_CHANNEL;
-	while (!(ADC0->SC1[0] & ADC_SC1_COCO_MASK))
-		; // wait until end of conversion
 	res = ADC0->R[0];
 	measured_current = (res*V_REF*MA_SCALING_FACTOR)/(ADC_FULL_SCALE*R_SENSE);
 
@@ -134,10 +130,21 @@ void Init_ADC(void) {
 	// Configure ADC to read Ch 8 (PTB 0)
 	SIM->SCGC6 |= SIM_SCGC6_ADC0_MASK; 
 	ADC0->CFG1 = 0x0C; // 16 bit
+	ADC0_SC1A  = ADC_SC1_AIEN_MASK; // enable interrupts
 	ADC0->SC2 = ADC_SC2_REFSEL(0);
+	
+	/* Enable Interrupts */
+	NVIC_SetPriority(ADC0_IRQn, 128); // 0, 64, 128 or 192
+	NVIC_ClearPendingIRQ(ADC0_IRQn); 
+	NVIC_EnableIRQ(ADC0_IRQn);
 	
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
 	PORTB->PCR[0]  &= PORT_PCR_MUX(7); 
+}
+
+void ADC0_IRQHandler()
+{
+	Control_HBLED(); //The flag will be cleared when we read the ADC value in this function
 }
 
 void TPM0_IRQHandler()
@@ -147,7 +154,8 @@ void TPM0_IRQHandler()
 	TPM0->SC |= TPM_SC_TOF_MASK;
 	if(flip)
 	{
-		Control_HBLED();
+		// Start conversion
+		ADC0->SC1[0] = ADC_SC1_AIEN(1) | ADC_SENSE_CHANNEL;
 	}
 	flip^=1;
 	PTB->PCOR = MASK(DBG_IRQ_TPM);

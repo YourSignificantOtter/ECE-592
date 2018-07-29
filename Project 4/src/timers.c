@@ -73,7 +73,6 @@ void PWM_Init(TPM_Type * TPM, uint8_t channel_num, uint16_t period, uint16_t dut
 	// Set initial duty cycle
 	TPM->CONTROLS[channel_num].CnV = duty;
 	
-	//Enable Interrupts
 	/* Enable Interrupts */
 	NVIC_SetPriority(TPM0_IRQn, 128); // 0, 64, 128 or 192
 	NVIC_ClearPendingIRQ(TPM0_IRQn); 
