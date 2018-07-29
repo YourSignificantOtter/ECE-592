@@ -149,15 +149,15 @@ void ADC0_IRQHandler()
 
 void TPM0_IRQHandler()
 {
-	static int flip = 0;
+	//static int flip = 0;
 	PTB->PSOR = MASK(DBG_IRQ_TPM);
 	TPM0->SC |= TPM_SC_TOF_MASK;
-	if(flip)
-	{
+	//if(flip)
+	//{
 		// Start conversion
 		ADC0->SC1[0] = ADC_SC1_AIEN(1) | ADC_SENSE_CHANNEL;
-	}
-	flip^=1;
+	//}
+	//flip^=1;
 	PTB->PCOR = MASK(DBG_IRQ_TPM);
 }
 
