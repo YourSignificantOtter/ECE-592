@@ -5,14 +5,14 @@
 #include "debug.h"
 
 void PIT_IRQHandler() {
-	PTB->PSOR = MASK(DBG_IRQ_TPM);
+	//PTB->PSOR = MASK(DBG_IRQ_TPM);
 	if (PIT->CHANNEL[0].TFLG & PIT_TFLG_TIF_MASK) {
 		// clear status flag for timer channel 0
 		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;		
 		// Do ISR work here
-		Control_HBLED();
+		//Control_HBLED();
 	}
-	PTB->PCOR = MASK(DBG_IRQ_TPM);
+	//PTB->PCOR = MASK(DBG_IRQ_TPM);
 }
 
 void PIT_Init(unsigned period) {
@@ -67,11 +67,18 @@ void PWM_Init(TPM_Type * TPM, uint8_t channel_num, uint16_t period, uint16_t dut
 	//set channel to center-aligned low-true PWM
 	TPM->CONTROLS[channel_num].CnSC = TPM_CnSC_MSB_MASK | TPM_CnSC_ELSA_MASK;
 	//set TPM to up-down and divide by 1 prescaler and clock mode
-	TPM->SC = (TPM_SC_CPWMS_MASK | TPM_SC_PS(0));
+	TPM->SC = (TPM_SC_CPWMS_MASK | TPM_SC_PS(0) | TPM_SC_TOIE_MASK);
 	//set trigger mode and keep running in debug mode
 	TPM->CONF |= TPM_CONF_TRGSEL(0xA) | TPM_CONF_DBGMODE(3);
 	// Set initial duty cycle
 	TPM->CONTROLS[channel_num].CnV = duty;
+	
+	//Enable Interrupts
+	/* Enable Interrupts */
+	NVIC_SetPriority(TPM0_IRQn, 128); // 0, 64, 128 or 192
+	NVIC_ClearPendingIRQ(TPM0_IRQn); 
+	NVIC_EnableIRQ(TPM0_IRQn);
+	
  // Start the timer counting
 	TPM->SC |= TPM_SC_CMOD(1);
 }

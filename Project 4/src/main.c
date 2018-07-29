@@ -19,7 +19,7 @@ volatile int measured_current;
 volatile int16_t duty_cycle=0;
 volatile int error;
 
-enum {BangBang, Incremental, Proportional, PID} control_mode=Proportional;
+enum {BangBang, Incremental, Proportional, PID} control_mode=PID;
 
 typedef struct {
 	float dState; // Last position input
@@ -138,6 +138,19 @@ void Init_ADC(void) {
 	
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
 	PORTB->PCR[0]  &= PORT_PCR_MUX(7); 
+}
+
+void TPM0_IRQHandler()
+{
+	static int flip = 0;
+	PTB->PSOR = MASK(DBG_IRQ_TPM);
+	TPM0->SC |= TPM_SC_TOF_MASK;
+	if(flip)
+	{
+		Control_HBLED();
+	}
+	flip^=1;
+	PTB->PCOR = MASK(DBG_IRQ_TPM);
 }
 
 /*----------------------------------------------------------------------------
