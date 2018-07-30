@@ -5,6 +5,7 @@
 #include "debug.h"
 
 extern volatile int g_dly_cntr;
+void Control_HBLED(void);
 
 void PIT_IRQHandler() {
 	PTB->PSOR = MASK(DBG_IRQ_TPM);

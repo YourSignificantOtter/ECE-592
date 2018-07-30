@@ -19,7 +19,7 @@ volatile int measured_current;
 volatile int16_t duty_cycle=0;
 volatile int error;
 
-enum {BangBang, Incremental, Proportional, PID} control_mode=Proportional;
+enum {BangBang, Incremental, Proportional, PID} control_mode=BangBang;
 
 typedef struct {
 	float dState; // Last position input
